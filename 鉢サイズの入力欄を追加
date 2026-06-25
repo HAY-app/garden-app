@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>果樹管理ノート</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Hiragino Sans", "Meiryo", sans-serif;
+      background-color: #f4f8f0;
+      color: #333;
+    }
+
+    /* ── ヘッダー ── */
+    header {
+      background-color: #4a7c59;
+      color: white;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 { font-size: 22px; font-weight: bold; }
+    header p  { font-size: 13px; margin-top: 4px; opacity: 0.8; }
+
+    .add-btn {
+      background: white;
+      color: #4a7c59;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .add-btn:hover { background: #e8f5e1; }
+
+    /* ── メイン ── */
+    main {
+      padding: 20px 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .section-title {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 12px;
+      letter-spacing: 0.05em;
+    }
+    .plant-list { display: flex; flex-direction: column; gap: 12px; }
+
+    /* ── カード ── */
+    .plant-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      overflow: hidden;
+      position: relative;
+    }
+    .card-main {
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .plant-icon { font-size: 36px; line-height: 1; flex-shrink: 0; }
+    .plant-info { flex: 1; }
+    .plant-name {
+      font-size: 17px;
+      font-weight: bold;
+      color: #2d5016;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .plant-name:hover { text-decoration: underline; color: #3a7040; }
+    .plant-sub  { font-size: 12px; color: #888; margin-top: 2px; }
+
+    .fertilize-block { text-align: right; flex-shrink: 0; }
+    .fertilize-label { font-size: 11px; color: #aaa; }
+    .fertilize-date  { font-size: 14px; font-weight: bold; color: #4a7c59; margin-top: 2px; }
+
+    .days-badge {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      background-color: #eaf3e4;
+      color: #4a7c59;
+    }
+    .days-badge.warn  { background-color: #fef3cd; color: #a07000; }
+    .days-badge.alert { background-color: #fde8e8; color: #c0392b; }
+
+    /* カードフッター: 2段構成 */
+    .card-footer {
+      border-top: 1px solid #f0f0f0;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .footer-actions { display: flex; gap: 8px; }
+
+    .btn-fertilize {
+      flex: 1;
+      padding: 8px 6px;
+      background: #4a7c59;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-fertilize:hover { background: #3a6347; }
+
+    .btn-work {
+      flex: 1;
+      padding: 8px 6px;
+      background: #f0f5ff;
+      color: #3a5a9e;
+      border: 1.5px solid #ccd8f5;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-work:hover { background: #dce8ff; }
+
+    .btn-history {
+      width: 100%;
+      padding: 7px;
+      background: #f5f5f5;
+      color: #777;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .btn-history:hover { background: #ebebeb; }
+
+    .delete-btn {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 16px;
+      color: #ccc;
+      cursor: pointer;
+      padding: 2px 4px;
+    }
+    .delete-btn:hover { color: #e74c3c; }
+
+    .drag-handle {
+      color: #ccc;
+      font-size: 20px;
+      cursor: grab;
+      flex-shrink: 0;
+      padding: 0 6px 0 2px;
+      user-select: none;
+      line-height: 1;
+    }
+    .drag-handle:hover  { color: #999; }
+    .drag-handle:active { cursor: grabbing; }
+    .plant-card.dragging  { opacity: 0.35; }
+    .plant-card.drag-over {
+      outline: 2px dashed #4a7c59;
+      outline-offset: -2px;
+      background: #f6fdf6;
+    }
+
+    .empty-msg {
+      text-align: center;
+      color: #aaa;
+      font-size: 14px;
+      padding: 40px 0;
+      line-height: 1.8;
+    }
+
+    /* ── モーダル共通 ── */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .overlay.open { display: flex; }
+
+    .modal {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      width: 360px;
+      max-width: 90vw;
+      max-height: 88vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .modal h2 { font-size: 17px; color: #2d5016; margin-bottom: 18px; }
+
+    .field { margin-bottom: 14px; }
+    .field label { font-size: 12px; color: #666; display: block; margin-bottom: 4px; }
+    .field input,
+    .field textarea {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+    }
+    .field input:focus,
+    .field textarea:focus { border-color: #4a7c59; }
+    .field textarea { resize: vertical; min-height: 80px; }
+
+    /* アイコン選択 */
+    .icon-picker { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .icon-option {
+      font-size: 24px;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 8px;
+      border: 2px solid transparent;
+    }
+    .icon-option.selected { border-color: #4a7c59; background: #eaf3e4; }
+
+    /* 作業種別ボタングリッド */
+    .work-type-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .type-btn {
+      padding: 10px 4px;
+      border: 2px solid #eee;
+      border-radius: 10px;
+      background: white;
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: center;
+      cursor: pointer;
+    }
+    .type-btn:hover { border-color: #c5dfc9; background: #f6fdf6; }
+    .type-btn.selected {
+      border-color: #3a5a9e;
+      background: #f0f5ff;
+      color: #2a4080;
+      font-weight: bold;
+    }
+
+    /* ボタン */
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-cancel {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .btn-cancel:hover { background: #f5f5f5; }
+    .btn-save {
+      flex: 2;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #4a7c59;
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-save:hover { background: #3a6347; }
+    .btn-save.blue { background: #3a5a9e; }
+    .btn-save.blue:hover { background: #2a4a8e; }
+
+    .error-msg { font-size: 12px; color: #e74c3c; margin-top: 6px; display: none; }
+
+    /* ── 履歴リスト ── */
+    .history-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .history-item {
+      border: 1px solid #eee;
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .history-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .history-date {
+      font-size: 13px;
+      font-weight: bold;
+      color: #555;
+    }
+    .kind-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+    .kind-badge.fertilize { background: #eaf3e4; color: #3a6a44; }
+    .kind-badge.work      { background: #eef2ff; color: #3a5a9e; }
+
+    .history-memo {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+      word-break: break-all;
+    }
+    .history-del {
+      background: none;
+      border: none;
+      color: #ccc;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0 2px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .history-del:hover { color: #e74c3c; }
+
+    .history-empty {
+      text-align: center;
+      color: #aaa;
+      font-size: 13px;
+      padding: 24px 0;
+    }
+
+    .history-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .filter-chip {
+      padding: 4px 12px;
+      border-radius: 99px;
+      border: 1.5px solid #ddd;
+      background: white;
+      font-size: 12px;
+      cursor: pointer;
+      color: #666;
+    }
+    .filter-chip:hover { border-color: #4a7c59; color: #4a7c59; }
+    .filter-chip.selected {
+      background: #4a7c59;
+      border-color: #4a7c59;
+      color: white;
+    }
+
+    /* ── 収穫量入力 ── */
+    .harvest-input {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .harvest-input input { flex: 1; }
+    .unit-toggle {
+      display: flex;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .unit-btn {
+      padding: 8px 14px;
+      border: none;
+      background: white;
+      font-size: 14px;
+      cursor: pointer;
+      color: #666;
+    }
+    .unit-btn + .unit-btn { border-left: 1px solid #ddd; }
+    .unit-btn.selected { background: #3a5a9e; color: white; font-weight: bold; }
+
+    /* ── 基礎情報モーダル ── */
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .detail-icon    { font-size: 44px; line-height: 1; flex-shrink: 0; }
+    .detail-name    { font-size: 20px; font-weight: bold; color: #2d5016; }
+    .detail-variety { font-size: 13px; color: #888; margin-top: 3px; }
+
+    .detail-info-box {
+      background: #f9fdf7;
+      border: 1px solid #e0eed8;
+      border-radius: 10px;
+      padding: 4px 14px;
+      margin-bottom: 16px;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+    }
+    .detail-row + .detail-row { border-top: 1px solid #eee; }
+    .detail-label { font-size: 12px; color: #888; flex-shrink: 0; margin-right: 12px; }
+    .detail-value { font-size: 14px; font-weight: bold; color: #333; text-align: right; }
+    .detail-value.empty { color: #bbb; font-weight: normal; font-size: 13px; }
+
+    .detail-note-section { margin-top: 4px; }
+    .detail-note-title {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #eee;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🌿 果樹管理ノート</h1>
+    <p>家庭菜園の果樹をかんたん記録</p>
+  </div>
+  <button class="add-btn" onclick="openAddModal()">＋ 追加</button>
+</header>
+
+<main>
+  <p class="section-title">登録中の果樹</p>
+  <div class="plant-list" id="plantList"></div>
+</main>
+
+<!-- ① 果樹追加 -->
+<div class="overlay" id="addOverlay">
+  <div class="modal">
+    <h2>🌱 果樹を追加</h2>
+    <div class="field">
+      <label>アイコン</label>
+      <div class="icon-picker" id="iconPicker"></div>
+    </div>
+    <div class="field">
+      <label>名前 <span style="color:#e74c3c">*</span></label>
+      <input type="text" id="inputName" placeholder="例：いちご">
+    </div>
+    <div class="field">
+      <label>品種（任意）</label>
+      <input type="text" id="inputVariety" placeholder="例：とちおとめ">
+    </div>
+    <div class="field">
+      <label>植えた日</label>
+      <input type="date" id="inputPlanted">
+    </div>
+    <div class="error-msg" id="addErrorMsg">名前を入力してください</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAddModal()">キャンセル</button>
+      <button class="btn-save"   onclick="saveNewPlant()">登録する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ② 施肥記録 -->
+<div class="overlay" id="recordOverlay">
+  <div class="modal">
+    <h2 id="recordTitle">💧 施肥を記録</h2>
+    <div class="field">
+      <label>施肥日 <span style="color:#e74c3c">*</span></label>
+      <input type="date" id="recordDate">
+    </div>
+    <div class="field">
+      <label>メモ（任意）</label>
+      <textarea id="recordMemo" placeholder="例：IB化成を一握り、液肥500倍希釈など"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeRecordModal()">キャンセル</button>
+      <button class="btn-save"   onclick="saveRecord()">記録する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ③ 作業記録 -->
+<div class="overlay" id="workOverlay">
+  <div class="modal">
+    <h2 id="workTitle">📓 作業を記録</h2>
+    <div class="field">
+      <label>作業の種類 <span style="color:#e74c3c">*</span></label>
+      <div class="work-type-grid" id="workTypeGrid"></div>
+    </div>
+    <div class="field" id="harvestField" style="display:none">
+      <label>収穫量（任意）</label>
+      <div class="harvest-input">
+        <input type="number" id="harvestQty" placeholder="例：500" min="0" step="0.1">
+        <div class="unit-toggle">
+          <button class="unit-btn selected" id="unitG"  onclick="selectUnit('g')">g</button>
+          <button class="unit-btn"          id="unitKo" onclick="selectUnit('個')">個</button>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>作業日 <span style="color:#e74c3c">*</span></label>
+      <input type="date" id="workDate">
+    </div>
+    <div class="field">
+      <label>メモ（任意）</label>
+      <textarea id="workMemo" placeholder="例：古い葉を整理した、害虫を発見など"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel"     onclick="closeWorkModal()">キャンセル</button>
+      <button class="btn-save blue"  onclick="saveWork()">記録する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ 基礎情報 -->
+<div class="overlay" id="detailOverlay">
+  <div class="modal">
+    <div class="detail-header">
+      <div class="detail-icon" id="detailIcon"></div>
+      <div>
+        <div class="detail-name"    id="detailName"></div>
+        <div class="detail-variety" id="detailVariety"></div>
+      </div>
+    </div>
+
+    <div class="detail-info-box" id="detailInfoBox"></div>
+
+    <div class="detail-note-section">
+      <div class="detail-note-title">編集できる情報</div>
+      <div class="field">
+        <label>品種</label>
+        <input type="text" id="detailVarietyInput" placeholder="例：とちおとめ">
+      </div>
+      <div class="field">
+        <label>鉢のサイズ</label>
+        <input type="text" id="detailPotSize" placeholder="例：8号鉢、10リットル、地植えなど">
+      </div>
+      <div class="field">
+        <label>剪定時期（目安）</label>
+        <input type="text" id="detailPruning" placeholder="例：2月〜3月">
+      </div>
+      <div class="field">
+        <label>追肥時期（目安）</label>
+        <input type="text" id="detailFertilizing" placeholder="例：3月・6月・9月">
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeDetailModal()">閉じる</button>
+      <button class="btn-save"   onclick="saveDetail()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ④ 履歴（施肥＋作業 合算） -->
+<div class="overlay" id="historyOverlay">
+  <div class="modal">
+    <h2 id="historyTitle">📋 記録履歴</h2>
+    <div class="history-filter" id="historyFilter"></div>
+    <div class="history-list" id="historyList"></div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn-save" onclick="closeHistoryModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ════════════ 定数 ════════════ */
+
+  const ICONS = ["🍓","🌿","🍋","🍊","🍇","🍒","🥭","🍑","🍐","🍎","🫐","🥝"];
+
+  const WORK_TYPES = [
+    { label: "水やり",   icon: "💧" },
+    { label: "剪定",     icon: "✂️" },
+    { label: "農薬散布", icon: "🫙" },
+    { label: "植え替え", icon: "🪴" },
+    { label: "収穫",     icon: "🧺" },
+    { label: "その他",   icon: "📝" }
+  ];
+
+  /* ════════════ 状態 ════════════ */
+
+  let selectedIcon     = "🌿";
+  let selectedWorkType = WORK_TYPES[0].label;
+  let activeRecordId   = null;
+  let activeWorkId     = null;
+  let activeHistoryId     = null;
+  let activeHistoryFilter = "all";
+  let selectedUnit        = "g";
+  let dragSourceId     = null;
+  let activeDetailId   = null;
+
+  /* ════════════ データ ════════════ */
+
+  const DEFAULT_PLANTS = [
+    { id: 1, name: "いちご",      variety: "とちおとめ",      icon: "🍓",
+      plantedDate: "2025-10-15",
+      fertilizeHistory: [{ date: "2026-05-20", memo: "" }],
+      workHistory: [] },
+    { id: 2, name: "いちじく",    variety: "ブラウンターキー", icon: "🫐",
+      plantedDate: "2023-04-01",
+      fertilizeHistory: [{ date: "2026-04-10", memo: "" }],
+      workHistory: [] },
+    { id: 3, name: "フェイジョア", variety: "アポロ",          icon: "🌿",
+      plantedDate: "2022-11-03",
+      fertilizeHistory: [{ date: "2026-03-05", memo: "" }],
+      workHistory: [] }
+  ];
+
+  function loadPlants() {
+    const saved = localStorage.getItem("garden_plants");
+    if (!saved) return DEFAULT_PLANTS;
+    return JSON.parse(saved).map(p => {
+      // 旧データ移行
+      if (!p.fertilizeHistory) {
+        p.fertilizeHistory = p.lastFertilized ? [{ date: p.lastFertilized, memo: "" }] : [];
+        delete p.lastFertilized;
+      }
+      if (!p.workHistory)      p.workHistory = [];
+      if (!("pruningNote"     in p)) p.pruningNote     = "";
+      if (!("fertilizingNote" in p)) p.fertilizingNote = "";
+      if (!("potSize"         in p)) p.potSize         = "";
+      return p;
+    });
+  }
+
+  function savePlants(plants) {
+    localStorage.setItem("garden_plants", JSON.stringify(plants));
+  }
+
+  function getLastFertilized(plant) {
+    if (!plant.fertilizeHistory?.length) return null;
+    return [...plant.fertilizeHistory]
+      .sort((a, b) => new Date(b.date) - new Date(a.date))[0].date;
+  }
+
+  function getCombinedHistory(plant) {
+    const fertilize = (plant.fertilizeHistory || []).map(e => ({ ...e, kind: "fertilize" }));
+    const work      = (plant.workHistory      || []).map(e => ({ ...e, kind: "work"      }));
+    return [...fertilize, ...work].sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
+
+  /* ════════════ ユーティリティ ════════════ */
+
+  function daysSince(dateStr) {
+    if (!dateStr) return null;
+    const today = new Date(); today.setHours(0,0,0,0);
+    return Math.floor((today - new Date(dateStr)) / 86400000);
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return "未記録";
+    const d = new Date(dateStr);
+    return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+  }
+
+  function formatDateShort(dateStr) {
+    if (!dateStr) return "未記録";
+    const d = new Date(dateStr);
+    return `${d.getMonth()+1}月${d.getDate()}日`;
+  }
+
+  function todayStr() { return new Date().toISOString().slice(0,10); }
+
+  function badgeClass(days) {
+    if (days === null) return "";
+    if (days >= 60) return "alert";
+    if (days >= 30) return "warn";
+    return "";
+  }
+
+  function workTypeIcon(label) {
+    return WORK_TYPES.find(t => t.label === label)?.icon ?? "📝";
+  }
+
+  /* ════════════ 描画 ════════════ */
+
+  function render() {
+    const plants = loadPlants();
+    const list   = document.getElementById("plantList");
+    list.innerHTML = "";
+
+    if (!plants.length) {
+      list.innerHTML = '<p class="empty-msg">果樹がまだ登録されていません。<br>「＋ 追加」から登録してください。</p>';
+      return;
+    }
+
+    plants.forEach(plant => {
+      const lastDate   = getLastFertilized(plant);
+      const days       = daysSince(lastDate);
+      const cls        = badgeClass(days);
+      const daysText   = days !== null ? `${days}日経過` : "未記録";
+      const totalCount = (plant.fertilizeHistory?.length ?? 0) + (plant.workHistory?.length ?? 0);
+
+      const card = document.createElement("div");
+      card.className = "plant-card";
+      card.setAttribute("draggable", "true");
+      card.innerHTML = `
+        <button class="delete-btn" onclick="deletePlant(${plant.id})" title="削除">✕</button>
+        <div class="card-main">
+          <div class="drag-handle" title="ドラッグして並び替え">⠿</div>
+          <div class="plant-icon">${plant.icon}</div>
+          <div class="plant-info">
+            <div class="plant-name" onclick="openDetailModal(${plant.id})">${plant.name}</div>
+            <div class="plant-sub">${plant.variety || "品種未登録"}</div>
+          </div>
+          <div class="fertilize-block">
+            <div class="fertilize-label">最後の施肥</div>
+            <div class="fertilize-date">${formatDateShort(lastDate)}</div>
+            <span class="days-badge ${cls}">${daysText}</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="footer-actions">
+            <button class="btn-fertilize" onclick="openRecordModal(${plant.id})">💧 施肥を記録</button>
+            <button class="btn-work"      onclick="openWorkModal(${plant.id})">📓 作業を記録</button>
+          </div>
+          <button class="btn-history" onclick="openHistoryModal(${plant.id})">
+            📋 履歴をみる（${totalCount}件）
+          </button>
+        </div>
+      `;
+
+      // ── ドラッグ＆ドロップ ──
+      let canDrag = false;
+      const handle = card.querySelector(".drag-handle");
+      handle.addEventListener("mousedown", () => { canDrag = true; });
+      handle.addEventListener("mouseup",   () => { canDrag = false; });
+
+      card.addEventListener("dragstart", e => {
+        if (!canDrag) { e.preventDefault(); return; }
+        dragSourceId = plant.id;
+        setTimeout(() => card.classList.add("dragging"), 0);
+        e.dataTransfer.effectAllowed = "move";
+      });
+      card.addEventListener("dragend", () => {
+        canDrag = false;
+        card.classList.remove("dragging");
+        document.querySelectorAll(".plant-card").forEach(c => c.classList.remove("drag-over"));
+      });
+      card.addEventListener("dragover", e => {
+        e.preventDefault();
+        if (dragSourceId !== null && plant.id !== dragSourceId) {
+          card.classList.add("drag-over");
+        }
+      });
+      card.addEventListener("dragleave", () => {
+        card.classList.remove("drag-over");
+      });
+      card.addEventListener("drop", e => {
+        e.preventDefault();
+        card.classList.remove("drag-over");
+        if (dragSourceId === null || dragSourceId === plant.id) return;
+        const plants  = loadPlants();
+        const fromIdx = plants.findIndex(p => p.id === dragSourceId);
+        const toIdx   = plants.findIndex(p => p.id === plant.id);
+        const [moved] = plants.splice(fromIdx, 1);
+        plants.splice(toIdx, 0, moved);
+        dragSourceId = null;
+        savePlants(plants);
+        render();
+      });
+
+      list.appendChild(card);
+    });
+  }
+
+  function deletePlant(id) {
+    const plants = loadPlants();
+    const target = plants.find(p => p.id === id);
+    if (!target || !confirm(`「${target.name}」を削除しますか？`)) return;
+    savePlants(plants.filter(p => p.id !== id));
+    render();
+  }
+
+  /* ════════════ ① 果樹追加 ════════════ */
+
+  function buildIconPicker() {
+    const picker = document.getElementById("iconPicker");
+    picker.innerHTML = "";
+    ICONS.forEach(icon => {
+      const span = document.createElement("span");
+      span.className = "icon-option" + (icon === selectedIcon ? " selected" : "");
+      span.textContent = icon;
+      span.onclick = () => {
+        selectedIcon = icon;
+        picker.querySelectorAll(".icon-option").forEach(el => el.classList.remove("selected"));
+        span.classList.add("selected");
+      };
+      picker.appendChild(span);
+    });
+  }
+
+  function openAddModal() {
+    selectedIcon = "🌿";
+    buildIconPicker();
+    ["inputName","inputVariety","inputPlanted"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("addErrorMsg").style.display = "none";
+    document.getElementById("addOverlay").classList.add("open");
+  }
+
+  function closeAddModal() { document.getElementById("addOverlay").classList.remove("open"); }
+
+  function saveNewPlant() {
+    const name = document.getElementById("inputName").value.trim();
+    if (!name) { document.getElementById("addErrorMsg").style.display = "block"; return; }
+    const plants = loadPlants();
+    const newId  = plants.length ? Math.max(...plants.map(p => p.id)) + 1 : 1;
+    plants.push({
+      id:               newId,
+      name,
+      variety:          document.getElementById("inputVariety").value.trim(),
+      icon:             selectedIcon,
+      plantedDate:      document.getElementById("inputPlanted").value,
+      fertilizeHistory: [],
+      workHistory:      []
+    });
+    savePlants(plants);
+    closeAddModal();
+    render();
+  }
+
+  /* ════════════ ② 施肥記録 ════════════ */
+
+  function openRecordModal(id) {
+    activeRecordId = id;
+    const plant = loadPlants().find(p => p.id === id);
+    document.getElementById("recordTitle").textContent = `💧 施肥を記録 — ${plant.name}`;
+    document.getElementById("recordDate").value = todayStr();
+    document.getElementById("recordMemo").value = "";
+    document.getElementById("recordOverlay").classList.add("open");
+  }
+
+  function closeRecordModal() {
+    document.getElementById("recordOverlay").classList.remove("open");
+    activeRecordId = null;
+  }
+
+  function saveRecord() {
+    const date = document.getElementById("recordDate").value;
+    if (!date) return;
+    const memo   = document.getElementById("recordMemo").value.trim();
+    const plants = loadPlants();
+    const plant  = plants.find(p => p.id === activeRecordId);
+    if (!plant) return;
+    plant.fertilizeHistory.push({ date, memo });
+    savePlants(plants);
+    closeRecordModal();
+    render();
+  }
+
+  /* ════════════ ③ 作業記録 ════════════ */
+
+  function selectUnit(unit) {
+    selectedUnit = unit;
+    document.getElementById("unitG").classList.toggle("selected",  unit === "g");
+    document.getElementById("unitKo").classList.toggle("selected", unit === "個");
+  }
+
+  function buildWorkTypeGrid() {
+    const grid = document.getElementById("workTypeGrid");
+    grid.innerHTML = "";
+    WORK_TYPES.forEach(wt => {
+      const btn = document.createElement("button");
+      btn.className = "type-btn" + (wt.label === selectedWorkType ? " selected" : "");
+      btn.innerHTML = `${wt.icon}<br>${wt.label}`;
+      btn.onclick = () => {
+        selectedWorkType = wt.label;
+        grid.querySelectorAll(".type-btn").forEach(el => el.classList.remove("selected"));
+        btn.classList.add("selected");
+        document.getElementById("harvestField").style.display =
+          wt.label === "収穫" ? "block" : "none";
+      };
+      grid.appendChild(btn);
+    });
+  }
+
+  function openWorkModal(id) {
+    activeWorkId     = id;
+    selectedWorkType = WORK_TYPES[0].label;
+    selectedUnit     = "g";
+    const plant = loadPlants().find(p => p.id === id);
+    document.getElementById("workTitle").textContent    = `📓 作業を記録 — ${plant.name}`;
+    document.getElementById("workDate").value           = todayStr();
+    document.getElementById("workMemo").value           = "";
+    document.getElementById("harvestQty").value         = "";
+    document.getElementById("harvestField").style.display = "none";
+    selectUnit("g");
+    buildWorkTypeGrid();
+    document.getElementById("workOverlay").classList.add("open");
+  }
+
+  function closeWorkModal() {
+    document.getElementById("workOverlay").classList.remove("open");
+    activeWorkId = null;
+  }
+
+  function saveWork() {
+    const date = document.getElementById("workDate").value;
+    if (!date) return;
+    const memo  = document.getElementById("workMemo").value.trim();
+    const entry = { date, type: selectedWorkType, memo };
+
+    if (selectedWorkType === "収穫") {
+      const qty = parseFloat(document.getElementById("harvestQty").value);
+      if (!isNaN(qty) && qty > 0) {
+        entry.quantity = qty;
+        entry.unit     = selectedUnit;
+      }
+    }
+
+    const plants = loadPlants();
+    const plant  = plants.find(p => p.id === activeWorkId);
+    if (!plant) return;
+    plant.workHistory.push(entry);
+    savePlants(plants);
+    closeWorkModal();
+    render();
+  }
+
+  /* ════════════ ⑤ 基礎情報 ════════════ */
+
+  function openDetailModal(id) {
+    activeDetailId = id;
+    const plant = loadPlants().find(p => p.id === id);
+
+    document.getElementById("detailIcon").textContent    = plant.icon;
+    document.getElementById("detailName").textContent    = plant.name;
+    document.getElementById("detailVariety").textContent = plant.variety || "品種未登録";
+    document.getElementById("detailVarietyInput").value  = plant.variety         || "";
+    document.getElementById("detailPotSize").value       = plant.potSize         || "";
+    document.getElementById("detailPruning").value       = plant.pruningNote     || "";
+    document.getElementById("detailFertilizing").value   = plant.fertilizingNote || "";
+
+    // 植え替え履歴（workHistoryのtype==="植え替え"）
+    const repotDates = (plant.workHistory || [])
+      .filter(e => e.type === "植え替え")
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    const repotText = repotDates.length
+      ? repotDates.map(e => formatDate(e.date)).join("、")
+      : null;
+
+    const box = document.getElementById("detailInfoBox");
+    box.innerHTML = `
+      <div class="detail-row">
+        <span class="detail-label">植えた日</span>
+        <span class="detail-value ${plant.plantedDate ? "" : "empty"}">
+          ${plant.plantedDate ? formatDate(plant.plantedDate) : "未登録"}
+        </span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">植え替え実施日</span>
+        <span class="detail-value ${repotText ? "" : "empty"}">
+          ${repotText ?? "記録なし"}
+        </span>
+      </div>
+    `;
+
+    document.getElementById("detailOverlay").classList.add("open");
+  }
+
+  function closeDetailModal() {
+    document.getElementById("detailOverlay").classList.remove("open");
+    activeDetailId = null;
+  }
+
+  function saveDetail() {
+    const plants = loadPlants();
+    const plant  = plants.find(p => p.id === activeDetailId);
+    if (!plant) return;
+    plant.variety         = document.getElementById("detailVarietyInput").value.trim();
+    plant.potSize         = document.getElementById("detailPotSize").value.trim();
+    plant.pruningNote     = document.getElementById("detailPruning").value.trim();
+    plant.fertilizingNote = document.getElementById("detailFertilizing").value.trim();
+    savePlants(plants);
+    closeDetailModal();
+    render();
+  }
+
+  /* ════════════ ④ 履歴（合算） ════════════ */
+
+  function openHistoryModal(id) {
+    activeHistoryId     = id;
+    activeHistoryFilter = "all";
+    renderHistory();
+    document.getElementById("historyOverlay").classList.add("open");
+  }
+
+  function closeHistoryModal() {
+    document.getElementById("historyOverlay").classList.remove("open");
+    activeHistoryId = null;
+  }
+
+  function filterLabel(key) {
+    if (key === "fertilize") return "💧 施肥";
+    return `${workTypeIcon(key)} ${key}`;
+  }
+
+  function setHistoryFilter(key) {
+    activeHistoryFilter = key;
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const plant = loadPlants().find(p => p.id === activeHistoryId);
+    if (!plant) return;
+
+    document.getElementById("historyTitle").textContent = `📋 記録履歴 — ${plant.name}`;
+
+    const combined = getCombinedHistory(plant);
+
+    // フィルターチップを構築（実際に存在する種類だけ表示）
+    const filterDiv = document.getElementById("historyFilter");
+    const existingKeys = [...new Set(combined.map(e => e.kind === "fertilize" ? "fertilize" : e.type))];
+    filterDiv.innerHTML = "";
+    ["all", ...existingKeys].forEach(key => {
+      const chip = document.createElement("button");
+      chip.className = "filter-chip" + (key === activeHistoryFilter ? " selected" : "");
+      chip.textContent = key === "all" ? "すべて" : filterLabel(key);
+      chip.onclick = () => setHistoryFilter(key);
+      filterDiv.appendChild(chip);
+    });
+
+    // フィルターを適用（削除用に元のインデックスを保持）
+    const indexed  = combined.map((e, i) => ({ ...e, originalIdx: i }));
+    const filtered = activeHistoryFilter === "all"
+      ? indexed
+      : indexed.filter(e =>
+          activeHistoryFilter === "fertilize"
+            ? e.kind === "fertilize"
+            : e.kind === "work" && e.type === activeHistoryFilter
+        );
+
+    const list = document.getElementById("historyList");
+    list.innerHTML = "";
+
+    if (!combined.length) {
+      list.innerHTML = '<p class="history-empty">まだ記録がありません。</p>';
+      return;
+    }
+    if (!filtered.length) {
+      list.innerHTML = '<p class="history-empty">該当する記録がありません。</p>';
+      return;
+    }
+
+    filtered.forEach(entry => {
+      const isFertilize = entry.kind === "fertilize";
+      const badgeText   = isFertilize ? "💧 施肥" : `${workTypeIcon(entry.type)} ${entry.type}`;
+      const badgeCls    = isFertilize ? "fertilize" : "work";
+
+      const item = document.createElement("div");
+      item.className = "history-item";
+      item.innerHTML = `
+        <div style="flex:1">
+          <div class="history-header">
+            <span class="history-date">${formatDate(entry.date)}</span>
+            <span class="kind-badge ${badgeCls}">${badgeText}</span>
+          </div>
+          ${entry.quantity ? `<div class="history-memo">収穫量：${entry.quantity}${entry.unit}</div>` : ""}
+          ${entry.memo    ? `<div class="history-memo">${entry.memo}</div>` : ""}
+        </div>
+        <button class="history-del" onclick="deleteHistoryEntry(${plant.id}, ${entry.originalIdx})" title="削除">✕</button>
+      `;
+      list.appendChild(item);
+    });
+  }
+
+  function deleteHistoryEntry(plantId, combinedIdx) {
+    if (!confirm("この記録を削除しますか？")) return;
+    const plants  = loadPlants();
+    const plant   = plants.find(p => p.id === plantId);
+    if (!plant) return;
+
+    const combined = getCombinedHistory(plant);
+    const target   = combined[combinedIdx];
+
+    if (target.kind === "fertilize") {
+      const i = plant.fertilizeHistory.findIndex(
+        e => e.date === target.date && e.memo === target.memo
+      );
+      if (i !== -1) plant.fertilizeHistory.splice(i, 1);
+    } else {
+      const i = plant.workHistory.findIndex(
+        e => e.date === target.date && e.type === target.type && e.memo === target.memo
+      );
+      if (i !== -1) plant.workHistory.splice(i, 1);
+    }
+
+    savePlants(plants);
+    render();
+    renderHistory();
+  }
+
+  /* ════════════ オーバーレイ外クリックで閉じる ════════════ */
+
+  ["addOverlay","recordOverlay","workOverlay","detailOverlay","historyOverlay"].forEach(id => {
+    document.getElementById(id).addEventListener("click", function(e) {
+      if (e.target === this) {
+        this.classList.remove("open");
+        activeRecordId = activeWorkId = activeHistoryId = null;
+      }
+    });
+  });
+
+  render();
+</script>
+
+</body>
+</html>
