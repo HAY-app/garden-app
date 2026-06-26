@@ -75,6 +75,14 @@
     .dash-label { font-size: 11px; color: #aaa; margin-top: 6px; }
     .dash-harvest-amounts { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
     .dash-harvest-sep { color: #ccc; font-size: 16px; }
+    .dash-card-title { font-size: 12px; color: #888; margin-bottom: 10px; }
+    .dash-ranking { display: flex; flex-direction: column; gap: 8px; }
+    .dash-rank-row { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+    .dash-rank-num { font-size: 11px; color: #bbb; min-width: 14px; text-align: right; flex-shrink: 0; }
+    .dash-rank-icon { font-size: 16px; line-height: 1; flex-shrink: 0; }
+    .dash-rank-name { flex: 1; color: #444; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dash-rank-val { font-weight: bold; color: #2d5016; white-space: nowrap; }
+    .dash-rank-empty { color: #ccc; font-size: 13px; }
     .plant-list { display: flex; flex-direction: column; gap: 12px; }
 
     /* ── カード ── */
@@ -1167,39 +1175,55 @@
     const thisYear = new Date().getFullYear();
 
     let harvestCount = 0;
-    let harvestG     = 0;
-    let harvestKo    = 0;
     let photoCount   = 0;
     let workCount    = 0;
 
-    plants.forEach(plant => {
+    // 果樹ごとに今年の収穫量を集計
+    const plantRanking = plants.map(plant => {
       workCount += (plant.fertilizeHistory?.length ?? 0)
                  + (plant.workHistory?.length ?? 0);
-
       photoCount += (plant.workHistory  || []).filter(e => e.photo).length;
       photoCount += (plant.photoHistory || []).length;
 
+      let g = 0, ko = 0, count = 0;
       (plant.workHistory || [])
         .filter(e => e.type === "収穫" && new Date(e.date).getFullYear() === thisYear)
         .forEach(e => {
+          count++;
           harvestCount++;
           if (e.quantity > 0) {
-            if ((e.unit || "g") === "g") harvestG  += e.quantity;
-            else                          harvestKo += e.quantity;
+            if ((e.unit || "g") === "g") g  += e.quantity;
+            else                          ko += e.quantity;
           }
         });
-    });
+      return { plant, g, ko, count };
+    })
+    .filter(r => r.count > 0)
+    .sort((a, b) => (b.g - a.g) || (b.ko - a.ko));
 
     const fmtNum = v => Number.isInteger(v) ? v : v.toFixed(1);
 
-    let harvestHtml;
-    if (harvestG === 0 && harvestKo === 0) {
-      harvestHtml = `<span style="color:#ccc; font-size:16px">記録なし</span>`;
+    // ランキング行を生成
+    let rankingHtml;
+    if (plantRanking.length === 0) {
+      rankingHtml = `<div class="dash-rank-empty">まだ記録がありません</div>`;
     } else {
-      const parts = [];
-      if (harvestG  > 0) parts.push(`${fmtNum(harvestG)}<span class="dash-unit">g</span>`);
-      if (harvestKo > 0) parts.push(`${fmtNum(harvestKo)}<span class="dash-unit">個</span>`);
-      harvestHtml = parts.join('<span class="dash-harvest-sep">／</span>');
+      rankingHtml = plantRanking.map((r, i) => {
+        const nameStr = r.plant.variety
+          ? `${r.plant.name}・${r.plant.variety}`
+          : r.plant.name;
+        const amounts = [];
+        if (r.g  > 0) amounts.push(`${fmtNum(r.g)}g`);
+        if (r.ko > 0) amounts.push(`${fmtNum(r.ko)}個`);
+        const valStr = amounts.length ? amounts.join('・') : '数量未記録';
+        return `
+          <div class="dash-rank-row">
+            <span class="dash-rank-num">${i + 1}</span>
+            <span class="dash-rank-icon">${r.plant.icon}</span>
+            <span class="dash-rank-name">${nameStr}</span>
+            <span class="dash-rank-val">${valStr}</span>
+          </div>`;
+      }).join('');
     }
 
     document.getElementById("dashboard").innerHTML = `
@@ -1224,9 +1248,8 @@
         <div class="dash-label">今年の収穫回数</div>
       </div>
       <div class="dash-card wide">
-        <div class="dash-icon">📊</div>
-        <div class="dash-value dash-harvest-amounts">${harvestHtml}</div>
-        <div class="dash-label">今年の収穫量</div>
+        <div class="dash-card-title">📊 今年の収穫量ランキング</div>
+        <div class="dash-ranking">${rankingHtml}</div>
       </div>
     `;
   }
