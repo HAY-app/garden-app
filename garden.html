@@ -49,6 +49,40 @@
       margin-bottom: 12px;
       letter-spacing: 0.05em;
     }
+
+    /* ── ダッシュボード ── */
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .dash-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      padding: 14px 16px;
+    }
+    .dash-card.wide { grid-column: 1 / -1; }
+    .dash-icon { font-size: 18px; margin-bottom: 6px; }
+    .dash-value {
+      font-size: 22px;
+      font-weight: bold;
+      color: #2d5016;
+      line-height: 1.2;
+    }
+    .dash-unit { font-size: 13px; font-weight: normal; color: #555; }
+    .dash-label { font-size: 11px; color: #aaa; margin-top: 6px; }
+    .dash-harvest-amounts { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .dash-harvest-sep { color: #ccc; font-size: 16px; }
+    .dash-card-title { font-size: 12px; color: #888; margin-bottom: 10px; }
+    .dash-ranking { display: flex; flex-direction: column; gap: 8px; }
+    .dash-rank-row { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+    .dash-rank-num { font-size: 11px; color: #bbb; min-width: 14px; text-align: right; flex-shrink: 0; }
+    .dash-rank-icon { font-size: 16px; line-height: 1; flex-shrink: 0; }
+    .dash-rank-name { flex: 1; color: #444; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dash-rank-val { font-weight: bold; color: #2d5016; white-space: nowrap; }
+    .dash-rank-empty { color: #ccc; font-size: 13px; }
     .plant-list { display: flex; flex-direction: column; gap: 12px; }
 
     /* ── カード ── */
@@ -391,6 +425,244 @@
     .unit-btn + .unit-btn { border-left: 1px solid #ddd; }
     .unit-btn.selected { background: #3a5a9e; color: white; font-weight: bold; }
 
+    /* ── 写真 ── */
+    .photo-upload-label {
+      display: block;
+      padding: 10px;
+      background: #f5f5f5;
+      border: 1.5px dashed #ccc;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #666;
+      text-align: center;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .photo-upload-label:hover { background: #ebebeb; border-color: #aaa; }
+
+    .photo-preview-wrap {
+      margin-top: 8px;
+      position: relative;
+      display: none;
+    }
+    .photo-preview {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      display: block;
+    }
+    .photo-clear-btn {
+      position: absolute;
+      top: 6px; right: 6px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      border: none;
+      border-radius: 99px;
+      width: 26px; height: 26px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .photo-comment-input {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      margin-top: 8px;
+      box-sizing: border-box;
+    }
+    .photo-comment-input:focus { border-color: #4a7c59; }
+
+    .field select {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      background: white;
+      cursor: pointer;
+    }
+    .field select:focus { border-color: #4a7c59; }
+    .photo-comment-text {
+      font-size: 12px;
+      color: #666;
+      font-style: italic;
+      margin-top: 4px;
+    }
+
+    .history-thumb {
+      width: 100%;
+      max-height: 180px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-top: 8px;
+      display: block;
+      cursor: pointer;
+    }
+    .history-thumb:hover { opacity: 0.85; }
+
+    /* ── タグ ── */
+    .tag-input-wrap {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: white;
+      margin-top: 4px;
+    }
+    .tag-input-wrap:focus-within { border-color: #4a7c59; }
+    .tag-chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .tag-chips-row:empty { margin-bottom: 0; }
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      background: #eaf3e4;
+      color: #2d5016;
+      border-radius: 99px;
+      font-size: 12px;
+    }
+    .tag-chip button {
+      background: none;
+      border: none;
+      color: #5a9a6a;
+      cursor: pointer;
+      font-size: 11px;
+      padding: 0;
+      line-height: 1;
+    }
+    .tag-chip button:hover { color: #c0392b; }
+    .tag-input-row {
+      display: flex;
+      gap: 6px;
+    }
+    .tag-input-row input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 13px;
+      font-family: inherit;
+      padding: 2px 0;
+      min-width: 0;
+    }
+    .tag-add-btn {
+      padding: 4px 12px;
+      background: #4a7c59;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .tag-add-btn:hover { background: #3a6347; }
+
+    .history-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .hist-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      background: #eaf3e4;
+      color: #2d5016;
+      border-radius: 99px;
+    }
+
+    /* ── ギャラリーボタン（ヘッダー） ── */
+    .gallery-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .gallery-btn:hover { background: rgba(255,255,255,0.35); }
+
+    /* ── ギャラリーモーダル ── */
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: #aaa;
+      cursor: pointer;
+      padding: 0 2px;
+      line-height: 1;
+    }
+    .modal-close-btn:hover { color: #555; }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .gallery-card {
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fafafa;
+      border: 1px solid #eee;
+      cursor: pointer;
+    }
+    .gallery-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+    .gallery-thumb {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      display: block;
+    }
+    .gallery-info { padding: 8px 10px; }
+    .gallery-plant { font-size: 13px; font-weight: bold; color: #2d5016; }
+    .gallery-meta  { font-size: 11px; color: #888; margin-top: 2px; line-height: 1.5; }
+    .gallery-tags  { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+    .gallery-filter-section { margin-bottom: 10px; }
+    .gallery-filter-label {
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 4px;
+    }
+
+    .gallery-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: #aaa;
+      font-size: 13px;
+      padding: 32px 0;
+      line-height: 1.8;
+    }
+
+    /* 写真フルスクリーン */
+    #photoOverlay {
+      background: rgba(0,0,0,0.85);
+      cursor: zoom-out;
+    }
+    #photoOverlay img {
+      max-width: 92vw;
+      max-height: 92vh;
+      border-radius: 10px;
+      object-fit: contain;
+    }
+
     /* ── 基礎情報モーダル ── */
     .detail-header {
       display: flex;
@@ -428,6 +700,85 @@
       padding-bottom: 6px;
       border-bottom: 1px solid #eee;
     }
+
+    /* ── 収穫量グラフ ── */
+    .harvest-chart-section {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid #eee;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .chart-title { font-size: 13px; font-weight: bold; color: #2d5016; }
+
+    /* 月/年・単位の切り替えボタン */
+    .chart-toggle {
+      display: flex;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .chart-toggle-btn {
+      padding: 3px 10px;
+      border: none;
+      background: white;
+      font-size: 12px;
+      cursor: pointer;
+      color: #666;
+    }
+    .chart-toggle-btn + .chart-toggle-btn { border-left: 1px solid #ddd; }
+    .chart-toggle-btn.selected { background: #4a7c59; color: white; font-weight: bold; }
+
+    /* バーグラフ本体 */
+    .bar-chart-wrap { overflow-x: auto; padding-bottom: 4px; }
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 150px;      /* グラフエリアの高さ */
+      padding: 0 2px;
+      min-width: min-content;
+    }
+    .bar-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      min-width: 38px;
+      flex: 1;
+    }
+    .bar-value {
+      font-size: 10px;
+      color: #4a7c59;
+      font-weight: bold;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .bar-fill {
+      width: 80%;
+      max-width: 44px;
+      background: linear-gradient(to top, #3a6347, #6aaa7a);
+      border-radius: 4px 4px 0 0;
+      min-height: 4px;
+      transition: height 0.3s ease;
+    }
+    .bar-label {
+      font-size: 10px;
+      color: #888;
+      text-align: center;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+    .chart-empty {
+      text-align: center;
+      color: #bbb;
+      font-size: 13px;
+      padding: 16px 0;
+    }
   </style>
 </head>
 <body>
@@ -437,10 +788,14 @@
     <h1>🌿 果樹管理ノート</h1>
     <p>家庭菜園の果樹をかんたん記録</p>
   </div>
-  <button class="add-btn" onclick="openAddModal()">＋ 追加</button>
+  <div style="display:flex; gap:8px;">
+    <button class="gallery-btn" onclick="openGallery()" title="写真一覧">📷</button>
+    <button class="add-btn"     onclick="openAddModal()">＋ 追加</button>
+  </div>
 </header>
 
 <main>
+  <div class="dashboard" id="dashboard"></div>
   <p class="section-title">登録中の果樹</p>
   <div class="plant-list" id="plantList"></div>
 </main>
@@ -518,6 +873,28 @@
       <label>メモ（任意）</label>
       <textarea id="workMemo" placeholder="例：古い葉を整理した、害虫を発見など"></textarea>
     </div>
+    <div class="field">
+      <label>写真（任意）</label>
+      <label class="photo-upload-label" for="photoInput">📷 写真を選ぶ</label>
+      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+      <div class="photo-preview-wrap" id="photoPreviewWrap">
+        <img id="photoPreview" class="photo-preview">
+        <button class="photo-clear-btn" onclick="clearPhoto()">✕</button>
+        <input type="text" id="photoComment" class="photo-comment-input"
+               placeholder="写真へのコメント（任意）" maxlength="100">
+      </div>
+    </div>
+    <div class="field">
+      <label>タグ（任意）</label>
+      <div class="tag-input-wrap">
+        <div class="tag-chips-row" id="tagChips"></div>
+        <div class="tag-input-row">
+          <input type="text" id="tagInput" placeholder="例：初収穫・害虫注意・お気に入り" maxlength="20"
+                 onkeydown="if(event.key==='Enter'){event.preventDefault();addTag();}">
+          <button class="tag-add-btn" onclick="addTag()">追加</button>
+        </div>
+      </div>
+    </div>
     <div class="modal-actions">
       <button class="btn-cancel"     onclick="closeWorkModal()">キャンセル</button>
       <button class="btn-save blue"  onclick="saveWork()">記録する</button>
@@ -545,6 +922,10 @@
         <input type="text" id="detailVarietyInput" placeholder="例：とちおとめ">
       </div>
       <div class="field">
+        <label>鉢のサイズ</label>
+        <input type="text" id="detailPotSize" placeholder="例：8号鉢、10リットル、地植えなど">
+      </div>
+      <div class="field">
         <label>剪定時期（目安）</label>
         <input type="text" id="detailPruning" placeholder="例：2月〜3月">
       </div>
@@ -554,11 +935,106 @@
       </div>
     </div>
 
+    <!-- 収穫量グラフ -->
+    <div class="harvest-chart-section">
+      <div class="chart-header">
+        <span class="chart-title">🧺 収穫量グラフ</span>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <!-- g と 個 の両方がある場合だけ表示 -->
+          <div class="chart-toggle" id="unitToggle" style="display:none">
+            <button class="chart-toggle-btn selected" id="toggleG"  onclick="setDetailChartUnit('g')">g</button>
+            <button class="chart-toggle-btn"          id="toggle個" onclick="setDetailChartUnit('個')">個</button>
+          </div>
+          <!-- 月ごと / 年ごと 切り替え -->
+          <div class="chart-toggle">
+            <button class="chart-toggle-btn selected" id="toggleMonth" onclick="setChartMode('month')">月</button>
+            <button class="chart-toggle-btn"          id="toggleYear"  onclick="setChartMode('year')">年</button>
+          </div>
+        </div>
+      </div>
+      <div class="bar-chart-wrap">
+        <div class="bar-chart" id="harvestChart"></div>
+      </div>
+      <p class="chart-empty" id="chartEmpty" style="display:none">収穫の記録がありません</p>
+    </div>
+
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeDetailModal()">閉じる</button>
       <button class="btn-save"   onclick="saveDetail()">保存する</button>
     </div>
   </div>
+</div>
+
+<!-- 写真一覧ギャラリー -->
+<div class="overlay" id="galleryOverlay">
+  <div class="modal" style="width:520px;">
+    <div class="modal-header">
+      <h2>📷 写真一覧</h2>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="add-btn" style="font-size:12px; padding:6px 12px; background:#4a7c59; color:white;"
+                onclick="openPhotoRegModal()">＋ 写真を登録</button>
+        <button class="modal-close-btn" onclick="closeGallery()">✕</button>
+      </div>
+    </div>
+    <div class="gallery-filter-section" id="galleryPlantFilter"></div>
+    <div class="gallery-filter-section" id="galleryTagFilter"></div>
+    <div class="gallery-grid"   id="galleryGrid"></div>
+  </div>
+</div>
+
+<!-- 写真登録モーダル -->
+<div class="overlay" id="photoRegOverlay">
+  <div class="modal">
+    <h2>📷 写真を登録</h2>
+
+    <div class="field">
+      <label>果樹を選ぶ <span style="color:#e74c3c">*</span></label>
+      <select id="photoRegPlant"></select>
+    </div>
+
+    <div class="field">
+      <label>写真 <span style="color:#e74c3c">*</span></label>
+      <label class="photo-upload-label" for="photoRegInput">📷 写真を選ぶ</label>
+      <input type="file" id="photoRegInput" accept="image/*" style="display:none"
+             onchange="handlePhotoRegUpload(event)">
+      <div class="photo-preview-wrap" id="photoRegPreviewWrap">
+        <img id="photoRegPreview" class="photo-preview">
+        <button class="photo-clear-btn" onclick="clearPhotoReg()">✕</button>
+        <input type="text" id="photoRegComment" class="photo-comment-input"
+               placeholder="写真へのコメント（任意）" maxlength="100">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>日付</label>
+      <input type="date" id="photoRegDate">
+    </div>
+
+    <div class="field">
+      <label>タグ（任意）</label>
+      <div class="tag-input-wrap">
+        <div class="tag-chips-row" id="photoRegTagChips"></div>
+        <div class="tag-input-row">
+          <input type="text" id="photoRegTagInput" placeholder="例：お気に入り・記録用"
+                 maxlength="20"
+                 onkeydown="if(event.key==='Enter'){event.preventDefault();addPhotoRegTag();}">
+          <button class="tag-add-btn" onclick="addPhotoRegTag()">追加</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="error-msg" id="photoRegError">果樹と写真を選んでください</div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closePhotoRegModal()">キャンセル</button>
+      <button class="btn-save"   onclick="savePhotoReg()">登録する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 写真フルスクリーン -->
+<div class="overlay" id="photoOverlay" onclick="this.classList.remove('open')">
+  <img id="photoFull" alt="作業写真">
 </div>
 
 <!-- ④ 履歴（施肥＋作業 合算） -->
@@ -596,6 +1072,15 @@
   let activeHistoryId     = null;
   let activeHistoryFilter = "all";
   let selectedUnit        = "g";
+  let workPhotoData       = null;
+  let workTags            = [];
+  let galleryFilter       = "all";
+  let galleryTagFilter    = "all";
+  let photoRegData        = null;
+  let photoRegTags        = [];
+  let chartMode           = "month"; // "month" または "year"
+  let detailChartUnit     = "g";     // "g" または "個"
+  const historyPhotoCache = [];
   let dragSourceId     = null;
   let activeDetailId   = null;
 
@@ -628,6 +1113,8 @@
       if (!p.workHistory)      p.workHistory = [];
       if (!("pruningNote"     in p)) p.pruningNote     = "";
       if (!("fertilizingNote" in p)) p.fertilizingNote = "";
+      if (!("potSize"         in p)) p.potSize         = "";
+      if (!p.photoHistory)           p.photoHistory    = [];
       return p;
     });
   }
@@ -681,9 +1168,96 @@
     return WORK_TYPES.find(t => t.label === label)?.icon ?? "📝";
   }
 
+  /* ════════════ ダッシュボード ════════════ */
+
+  function renderDashboard() {
+    const plants   = loadPlants();
+    const thisYear = new Date().getFullYear();
+
+    let harvestCount = 0;
+    let photoCount   = 0;
+    let workCount    = 0;
+
+    // 果樹ごとに今年の収穫量を集計
+    const plantRanking = plants.map(plant => {
+      workCount += (plant.fertilizeHistory?.length ?? 0)
+                 + (plant.workHistory?.length ?? 0);
+      photoCount += (plant.workHistory  || []).filter(e => e.photo).length;
+      photoCount += (plant.photoHistory || []).length;
+
+      let g = 0, ko = 0, count = 0;
+      (plant.workHistory || [])
+        .filter(e => e.type === "収穫" && new Date(e.date).getFullYear() === thisYear)
+        .forEach(e => {
+          count++;
+          harvestCount++;
+          if (e.quantity > 0) {
+            if ((e.unit || "g") === "g") g  += e.quantity;
+            else                          ko += e.quantity;
+          }
+        });
+      return { plant, g, ko, count };
+    })
+    .filter(r => r.count > 0)
+    .sort((a, b) => (b.g - a.g) || (b.ko - a.ko));
+
+    const fmtNum = v => Number.isInteger(v) ? v : v.toFixed(1);
+
+    // ランキング行を生成
+    let rankingHtml;
+    if (plantRanking.length === 0) {
+      rankingHtml = `<div class="dash-rank-empty">まだ記録がありません</div>`;
+    } else {
+      rankingHtml = plantRanking.map((r, i) => {
+        const nameStr = r.plant.variety
+          ? `${r.plant.name}・${r.plant.variety}`
+          : r.plant.name;
+        const amounts = [];
+        if (r.g  > 0) amounts.push(`${fmtNum(r.g)}g`);
+        if (r.ko > 0) amounts.push(`${fmtNum(r.ko)}個`);
+        const valStr = amounts.length ? amounts.join('・') : '数量未記録';
+        return `
+          <div class="dash-rank-row">
+            <span class="dash-rank-num">${i + 1}</span>
+            <span class="dash-rank-icon">${r.plant.icon}</span>
+            <span class="dash-rank-name">${nameStr}</span>
+            <span class="dash-rank-val">${valStr}</span>
+          </div>`;
+      }).join('');
+    }
+
+    document.getElementById("dashboard").innerHTML = `
+      <div class="dash-card">
+        <div class="dash-icon">🌿</div>
+        <div class="dash-value">${plants.length}<span class="dash-unit"> 種</span></div>
+        <div class="dash-label">登録果樹数</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-icon">📷</div>
+        <div class="dash-value">${photoCount}<span class="dash-unit"> 枚</span></div>
+        <div class="dash-label">写真枚数</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-icon">📓</div>
+        <div class="dash-value">${workCount}<span class="dash-unit"> 件</span></div>
+        <div class="dash-label">作業履歴件数</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-icon">🧺</div>
+        <div class="dash-value">${harvestCount}<span class="dash-unit"> 回</span></div>
+        <div class="dash-label">今年の収穫回数</div>
+      </div>
+      <div class="dash-card wide">
+        <div class="dash-card-title">📊 今年の収穫量ランキング</div>
+        <div class="dash-ranking">${rankingHtml}</div>
+      </div>
+    `;
+  }
+
   /* ════════════ 描画 ════════════ */
 
   function render() {
+    renderDashboard();
     const plants = loadPlants();
     const list   = document.getElementById("plantList");
     list.innerHTML = "";
@@ -859,6 +1433,69 @@
 
   /* ════════════ ③ 作業記録 ════════════ */
 
+  function renderTagChips() {
+    const row = document.getElementById("tagChips");
+    row.innerHTML = "";
+    workTags.forEach((tag, i) => {
+      const chip = document.createElement("span");
+      chip.className = "tag-chip";
+      chip.innerHTML = `${tag} <button onclick="removeTag(${i})">✕</button>`;
+      row.appendChild(chip);
+    });
+  }
+
+  function addTag() {
+    const input = document.getElementById("tagInput");
+    const tag   = input.value.trim();
+    if (!tag || workTags.includes(tag)) { input.value = ""; return; }
+    workTags.push(tag);
+    input.value = "";
+    renderTagChips();
+  }
+
+  function removeTag(idx) {
+    workTags.splice(idx, 1);
+    renderTagChips();
+  }
+
+  function handlePhotoUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 1200;
+        let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else       { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        workPhotoData = canvas.toDataURL("image/jpeg", 0.75);
+        document.getElementById("photoPreview").src       = workPhotoData;
+        document.getElementById("photoPreviewWrap").style.display = "block";
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearPhoto() {
+    workPhotoData = null;
+    document.getElementById("photoInput").value               = "";
+    document.getElementById("photoPreviewWrap").style.display = "none";
+    document.getElementById("photoPreview").src               = "";
+    document.getElementById("photoComment").value             = "";
+  }
+
+  function viewPhoto(idx) {
+    document.getElementById("photoFull").src = historyPhotoCache[idx];
+    document.getElementById("photoOverlay").classList.add("open");
+  }
+
   function selectUnit(unit) {
     selectedUnit = unit;
     document.getElementById("unitG").classList.toggle("selected",  unit === "g");
@@ -889,10 +1526,14 @@
     selectedUnit     = "g";
     const plant = loadPlants().find(p => p.id === id);
     document.getElementById("workTitle").textContent    = `📓 作業を記録 — ${plant.name}`;
-    document.getElementById("workDate").value           = todayStr();
-    document.getElementById("workMemo").value           = "";
-    document.getElementById("harvestQty").value         = "";
+    document.getElementById("workDate").value             = todayStr();
+    document.getElementById("workMemo").value             = "";
+    document.getElementById("harvestQty").value           = "";
     document.getElementById("harvestField").style.display = "none";
+    clearPhoto();
+    workTags = [];
+    document.getElementById("tagInput").value = "";
+    renderTagChips();
     selectUnit("g");
     buildWorkTypeGrid();
     document.getElementById("workOverlay").classList.add("open");
@@ -907,7 +1548,13 @@
     const date = document.getElementById("workDate").value;
     if (!date) return;
     const memo  = document.getElementById("workMemo").value.trim();
-    const entry = { date, type: selectedWorkType, memo };
+    const photoComment = document.getElementById("photoComment").value.trim();
+    const entry = {
+      date, type: selectedWorkType, memo,
+      photo:        workPhotoData              || undefined,
+      photoComment: photoComment               || undefined,
+      tags:         workTags.length ? [...workTags] : undefined
+    };
 
     if (selectedWorkType === "収穫") {
       const qty = parseFloat(document.getElementById("harvestQty").value);
@@ -936,6 +1583,7 @@
     document.getElementById("detailName").textContent    = plant.name;
     document.getElementById("detailVariety").textContent = plant.variety || "品種未登録";
     document.getElementById("detailVarietyInput").value  = plant.variety         || "";
+    document.getElementById("detailPotSize").value       = plant.potSize         || "";
     document.getElementById("detailPruning").value       = plant.pruningNote     || "";
     document.getElementById("detailFertilizing").value   = plant.fertilizingNote || "";
 
@@ -964,7 +1612,14 @@
       </div>
     `;
 
+    // グラフの状態をリセットしてから描画
+    chartMode       = "month";
+    detailChartUnit = "g";
+    document.getElementById("toggleMonth").classList.add("selected");
+    document.getElementById("toggleYear").classList.remove("selected");
     document.getElementById("detailOverlay").classList.add("open");
+    // モーダルが表示されてからグラフを描く
+    setTimeout(renderHarvestChart, 0);
   }
 
   function closeDetailModal() {
@@ -977,6 +1632,7 @@
     const plant  = plants.find(p => p.id === activeDetailId);
     if (!plant) return;
     plant.variety         = document.getElementById("detailVarietyInput").value.trim();
+    plant.potSize         = document.getElementById("detailPotSize").value.trim();
     plant.pruningNote     = document.getElementById("detailPruning").value.trim();
     plant.fertilizingNote = document.getElementById("detailFertilizing").value.trim();
     savePlants(plants);
@@ -1050,10 +1706,17 @@
       return;
     }
 
+    historyPhotoCache.length = 0;
     filtered.forEach(entry => {
       const isFertilize = entry.kind === "fertilize";
       const badgeText   = isFertilize ? "💧 施肥" : `${workTypeIcon(entry.type)} ${entry.type}`;
       const badgeCls    = isFertilize ? "fertilize" : "work";
+
+      let photoHtml = "";
+      if (entry.photo) {
+        const idx = historyPhotoCache.push(entry.photo) - 1;
+        photoHtml = `<img class="history-thumb" src="${entry.photo}" onclick="viewPhoto(${idx})" alt="作業写真">`;
+      }
 
       const item = document.createElement("div");
       item.className = "history-item";
@@ -1065,6 +1728,9 @@
           </div>
           ${entry.quantity ? `<div class="history-memo">収穫量：${entry.quantity}${entry.unit}</div>` : ""}
           ${entry.memo    ? `<div class="history-memo">${entry.memo}</div>` : ""}
+          ${photoHtml}
+          ${entry.photoComment ? `<div class="photo-comment-text">💬 ${entry.photoComment}</div>` : ""}
+          ${entry.tags?.length ? `<div class="history-tags">${entry.tags.map(t => `<span class="hist-tag">${t}</span>`).join("")}</div>` : ""}
         </div>
         <button class="history-del" onclick="deleteHistoryEntry(${plant.id}, ${entry.originalIdx})" title="削除">✕</button>
       `;
@@ -1098,9 +1764,356 @@
     renderHistory();
   }
 
+  /* ════════════ 写真一覧ギャラリー ════════════ */
+
+  function getAllPhotos() {
+    const photos = [];
+    loadPlants().forEach(plant => {
+      (plant.workHistory || []).forEach(entry => {
+        if (entry.photo) photos.push({ ...entry, plantName: plant.name, plantIcon: plant.icon, plantId: plant.id });
+      });
+      (plant.photoHistory || []).forEach(entry => {
+        photos.push({ ...entry, plantName: plant.name, plantIcon: plant.icon, plantId: plant.id });
+      });
+    });
+    return photos.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
+
+  function openGallery() {
+    galleryFilter    = "all";
+    galleryTagFilter = "all";
+    renderGallery();
+    document.getElementById("galleryOverlay").classList.add("open");
+  }
+
+  function closeGallery() {
+    document.getElementById("galleryOverlay").classList.remove("open");
+  }
+
+  function setGalleryFilter(key) {
+    galleryFilter = key;
+    renderGallery();
+  }
+
+  function setGalleryTagFilter(tag) {
+    galleryTagFilter = tag;
+    renderGallery();
+  }
+
+  function buildFilterRow(items, activeKey, onClick) {
+    const row = document.createElement("div");
+    row.className = "history-filter";
+    items.forEach(item => {
+      const chip = document.createElement("button");
+      chip.className = "filter-chip" + (item.key === activeKey ? " selected" : "");
+      chip.textContent = item.label;
+      chip.onclick = () => onClick(item.key);
+      row.appendChild(chip);
+    });
+    return row;
+  }
+
+  function renderGallery() {
+    const allPhotos = getAllPhotos();
+    const plants    = loadPlants();
+
+    // 果樹フィルター（2種類以上の果樹に写真がある場合のみ表示）
+    const plantFilterDiv = document.getElementById("galleryPlantFilter");
+    plantFilterDiv.innerHTML = "";
+    const plantIds = [...new Set(allPhotos.map(p => p.plantId))];
+    if (plantIds.length > 1) {
+      const label = document.createElement("div");
+      label.className = "gallery-filter-label";
+      label.textContent = "果樹";
+      const items = [
+        { key: "all", label: "すべて" },
+        ...plantIds.map(id => {
+          const pl = plants.find(p => p.id === id);
+          return { key: id, label: pl ? `${pl.icon} ${pl.name}` : "" };
+        })
+      ];
+      plantFilterDiv.appendChild(label);
+      plantFilterDiv.appendChild(buildFilterRow(items, galleryFilter, setGalleryFilter));
+    }
+
+    // タグフィルター（タグがある場合のみ表示）
+    const tagFilterDiv = document.getElementById("galleryTagFilter");
+    tagFilterDiv.innerHTML = "";
+    const allTags = [...new Set(allPhotos.flatMap(p => p.tags || []))];
+    if (allTags.length > 0) {
+      const label = document.createElement("div");
+      label.className = "gallery-filter-label";
+      label.textContent = "タグ";
+      const items = [
+        { key: "all", label: "すべて" },
+        ...allTags.map(t => ({ key: t, label: t }))
+      ];
+      tagFilterDiv.appendChild(label);
+      tagFilterDiv.appendChild(buildFilterRow(items, galleryTagFilter, setGalleryTagFilter));
+    }
+
+    // フィルター適用（果樹 AND タグ）
+    const filtered = allPhotos.filter(p => {
+      const matchPlant = galleryFilter    === "all" || p.plantId === galleryFilter;
+      const matchTag   = galleryTagFilter === "all" || p.tags?.includes(galleryTagFilter);
+      return matchPlant && matchTag;
+    });
+
+    const grid = document.getElementById("galleryGrid");
+    grid.innerHTML = "";
+
+    if (!allPhotos.length) {
+      grid.innerHTML = '<p class="gallery-empty">写真がまだありません。<br>「📓 作業を記録」から写真を追加できます。</p>';
+      return;
+    }
+    if (!filtered.length) {
+      grid.innerHTML = '<p class="gallery-empty">この果樹の写真はありません。</p>';
+      return;
+    }
+
+    filtered.forEach(p => {
+      const card = document.createElement("div");
+      card.className = "gallery-card";
+
+      const img = document.createElement("img");
+      img.className = "gallery-thumb";
+      img.src = p.photo;
+      img.alt = p.plantName;
+      img.onclick = () => {
+        document.getElementById("photoFull").src = p.photo;
+        document.getElementById("photoOverlay").classList.add("open");
+      };
+
+      const tagsHtml = p.tags?.length
+        ? `<div class="gallery-tags">${p.tags.map(t => `<span class="hist-tag">${t}</span>`).join("")}</div>`
+        : "";
+
+      const info = document.createElement("div");
+      info.className = "gallery-info";
+      info.innerHTML = `
+        <div class="gallery-plant">${p.plantIcon} ${p.plantName}</div>
+        <div class="gallery-meta">${formatDate(p.date)}${p.type ? ` · ${workTypeIcon(p.type)} ${p.type}` : ""}</div>
+        ${p.photoComment ? `<div class="photo-comment-text">💬 ${p.photoComment}</div>` : ""}
+        ${p.memo ? `<div class="gallery-meta">${p.memo}</div>` : ""}
+        ${tagsHtml}
+      `;
+
+      card.appendChild(img);
+      card.appendChild(info);
+      grid.appendChild(card);
+    });
+  }
+
+  /* ════════════ 収穫量グラフ ════════════ */
+
+  // 切り替えボタンを押したとき
+  function setChartMode(mode) {
+    chartMode = mode;
+    document.getElementById("toggleMonth").classList.toggle("selected", mode === "month");
+    document.getElementById("toggleYear").classList.toggle("selected",  mode === "year");
+    renderHarvestChart();
+  }
+
+  function setDetailChartUnit(unit) {
+    detailChartUnit = unit;
+    document.getElementById("toggleG").classList.toggle("selected",  unit === "g");
+    document.getElementById("toggle個").classList.toggle("selected", unit === "個");
+    renderHarvestChart();
+  }
+
+  function renderHarvestChart() {
+    const plant = loadPlants().find(p => p.id === activeDetailId);
+    if (!plant) return;
+
+    // 収穫記録（数量あり）だけ取り出す
+    const records = (plant.workHistory || [])
+      .filter(e => e.type === "収穫" && e.quantity > 0);
+
+    // 使われている単位を調べる（g / 個 / 両方）
+    const units       = [...new Set(records.map(e => e.unit || "g"))];
+    const unitToggle  = document.getElementById("unitToggle");
+    unitToggle.style.display = units.length > 1 ? "flex" : "none";
+
+    // 現在選択中の単位にデータがなければ、実際に使われている単位に切り替える
+    if (units.length > 0 && !units.includes(detailChartUnit)) {
+      detailChartUnit = units[0];
+      document.getElementById("toggleG").classList.toggle("selected",  detailChartUnit === "g");
+      document.getElementById("toggle個").classList.toggle("selected", detailChartUnit === "個");
+    }
+
+    // 現在選択中の単位に絞る
+    const filtered = records.filter(e => (e.unit || "g") === detailChartUnit);
+
+    // 月ごと または 年ごとに数量を合計する
+    const groups = {};
+    filtered.forEach(entry => {
+      const d   = new Date(entry.date);
+      const key = chartMode === "month"
+        ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+        : `${d.getFullYear()}`;
+      groups[key] = (groups[key] || 0) + entry.quantity;
+    });
+
+    // 日付順に並べる
+    const data = Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+
+    const chartEl = document.getElementById("harvestChart");
+    const emptyEl = document.getElementById("chartEmpty");
+    chartEl.innerHTML = "";
+
+    if (!data.length) {
+      chartEl.style.display = "none";
+      emptyEl.style.display = "block";
+      return;
+    }
+
+    chartEl.style.display = "flex";
+    emptyEl.style.display = "none";
+
+    const maxVal    = Math.max(...data.map(([, v]) => v));
+    const CHART_H   = 110; // バー最大高さ（px）
+    const multiYear = new Set(data.map(([k]) => k.slice(0, 4))).size > 1;
+
+    data.forEach(([key, val]) => {
+      // バーの高さ = (この期間の量 ÷ 最大量) × グラフ最大高さ
+      const barH = maxVal > 0 ? Math.max(4, Math.round((val / maxVal) * CHART_H)) : 4;
+
+      // ラベルを作る
+      let label;
+      if (chartMode === "month") {
+        const [y, m] = key.split("-");
+        label = multiYear
+          ? `${m}月<br><span style="font-size:9px;color:#aaa">${y}</span>`
+          : `${m}月`;
+      } else {
+        label = `${key}年`;
+      }
+
+      const valDisplay = Number.isInteger(val) ? val : val.toFixed(1);
+
+      const item = document.createElement("div");
+      item.className = "bar-item";
+      item.innerHTML = `
+        <div class="bar-value">${valDisplay}${detailChartUnit}</div>
+        <div class="bar-fill" style="height:${barH}px"></div>
+        <div class="bar-label">${label}</div>
+      `;
+      chartEl.appendChild(item);
+    });
+  }
+
+  /* ════════════ 写真登録モーダル ════════════ */
+
+  function openPhotoRegModal() {
+    const plants = loadPlants();
+    const select = document.getElementById("photoRegPlant");
+    select.innerHTML = '<option value="">-- 果樹を選んでください --</option>';
+    plants.forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = `${p.icon} ${p.name}`;
+      select.appendChild(opt);
+    });
+    photoRegData = null;
+    photoRegTags = [];
+    document.getElementById("photoRegDate").value             = todayStr();
+    document.getElementById("photoRegComment").value          = "";
+    document.getElementById("photoRegTagInput").value         = "";
+    document.getElementById("photoRegTagChips").innerHTML     = "";
+    document.getElementById("photoRegPreviewWrap").style.display = "none";
+    document.getElementById("photoRegPreview").src            = "";
+    document.getElementById("photoRegInput").value            = "";
+    document.getElementById("photoRegError").style.display    = "none";
+    document.getElementById("photoRegOverlay").classList.add("open");
+  }
+
+  function closePhotoRegModal() {
+    document.getElementById("photoRegOverlay").classList.remove("open");
+  }
+
+  function handlePhotoRegUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 1200;
+        let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else       { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        photoRegData = canvas.toDataURL("image/jpeg", 0.75);
+        document.getElementById("photoRegPreview").src               = photoRegData;
+        document.getElementById("photoRegPreviewWrap").style.display = "block";
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearPhotoReg() {
+    photoRegData = null;
+    document.getElementById("photoRegInput").value               = "";
+    document.getElementById("photoRegPreviewWrap").style.display = "none";
+    document.getElementById("photoRegPreview").src               = "";
+    document.getElementById("photoRegComment").value             = "";
+  }
+
+  function renderPhotoRegTagChips() {
+    const row = document.getElementById("photoRegTagChips");
+    row.innerHTML = "";
+    photoRegTags.forEach((tag, i) => {
+      const chip = document.createElement("span");
+      chip.className = "tag-chip";
+      chip.innerHTML = `${tag} <button onclick="removePhotoRegTag(${i})">✕</button>`;
+      row.appendChild(chip);
+    });
+  }
+
+  function addPhotoRegTag() {
+    const input = document.getElementById("photoRegTagInput");
+    const tag   = input.value.trim();
+    if (!tag || photoRegTags.includes(tag)) { input.value = ""; return; }
+    photoRegTags.push(tag);
+    input.value = "";
+    renderPhotoRegTagChips();
+  }
+
+  function removePhotoRegTag(idx) {
+    photoRegTags.splice(idx, 1);
+    renderPhotoRegTagChips();
+  }
+
+  function savePhotoReg() {
+    const plantId = parseInt(document.getElementById("photoRegPlant").value);
+    if (!plantId || !photoRegData) {
+      document.getElementById("photoRegError").style.display = "block";
+      return;
+    }
+    const entry = {
+      date:         document.getElementById("photoRegDate").value || todayStr(),
+      photo:        photoRegData,
+      photoComment: document.getElementById("photoRegComment").value.trim() || undefined,
+      tags:         photoRegTags.length ? [...photoRegTags] : undefined
+    };
+    const plants = loadPlants();
+    const plant  = plants.find(p => p.id === plantId);
+    if (!plant) return;
+    plant.photoHistory.push(entry);
+    savePlants(plants);
+    closePhotoRegModal();
+    renderGallery();
+    renderDashboard();
+  }
+
   /* ════════════ オーバーレイ外クリックで閉じる ════════════ */
 
-  ["addOverlay","recordOverlay","workOverlay","detailOverlay","historyOverlay"].forEach(id => {
+  ["addOverlay","recordOverlay","workOverlay","detailOverlay","historyOverlay","galleryOverlay","photoRegOverlay"].forEach(id => {
     document.getElementById(id).addEventListener("click", function(e) {
       if (e.target === this) {
         this.classList.remove("open");
