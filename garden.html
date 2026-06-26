@@ -83,6 +83,29 @@
     .dash-rank-name { flex: 1; color: #444; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dash-rank-val { font-weight: bold; color: #2d5016; white-space: nowrap; }
     .dash-rank-empty { color: #ccc; font-size: 13px; }
+
+    /* ── 品種マスタ ── */
+    .variety-item {
+      display: flex;
+      align-items: center;
+      padding: 9px 4px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .variety-item:last-child { border-bottom: none; }
+    .variety-item-info { flex: 1; }
+    .variety-item-name { font-size: 14px; font-weight: bold; color: #333; }
+    .variety-item-fruit { font-size: 11px; color: #aaa; margin-left: 8px; }
+    .variety-del-btn {
+      background: none; border: none; color: #ccc;
+      cursor: pointer; font-size: 14px; padding: 4px 8px;
+    }
+    .variety-del-btn:hover { color: #e74c3c; }
+    .variety-add-section {
+      margin-top: 16px; padding-top: 16px;
+      border-top: 1px solid #eee;
+    }
+    .variety-add-title { font-size: 13px; font-weight: bold; color: #555; margin-bottom: 10px; }
+    .variety-legacy-note { font-size: 11px; color: #aaa; margin-top: 4px; }
     .plant-list { display: flex; flex-direction: column; gap: 12px; }
 
     /* ── カード ── */
@@ -789,7 +812,8 @@
     <p>家庭菜園の果樹をかんたん記録</p>
   </div>
   <div style="display:flex; gap:8px;">
-    <button class="gallery-btn" onclick="openGallery()" title="写真一覧">📷</button>
+    <button class="gallery-btn" onclick="openVarietyModal()" title="品種マスタ">🌱</button>
+    <button class="gallery-btn" onclick="openGallery()"      title="写真一覧">📷</button>
     <button class="add-btn"     onclick="openAddModal()">＋ 追加</button>
   </div>
 </header>
@@ -799,6 +823,37 @@
   <p class="section-title">登録中の果樹</p>
   <div class="plant-list" id="plantList"></div>
 </main>
+
+<!-- ⓪ 品種マスタ -->
+<div class="overlay" id="varietyOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🌱 品種マスタ</h2>
+      <button class="modal-close-btn" onclick="closeVarietyModal()">✕</button>
+    </div>
+    <div id="varietyList"></div>
+    <div class="variety-add-section">
+      <div class="variety-add-title">＋ 品種を追加</div>
+      <div class="field">
+        <label>果樹名 <span style="color:#e74c3c">*</span></label>
+        <input type="text" id="mFruitName" placeholder="例：いちご">
+      </div>
+      <div class="field">
+        <label>品種名 <span style="color:#e74c3c">*</span></label>
+        <input type="text" id="mVarietyName" placeholder="例：とちおとめ">
+      </div>
+      <div class="field">
+        <label>メモ（任意）</label>
+        <input type="text" id="mMemo" placeholder="特性・育て方など">
+      </div>
+      <div class="error-msg" id="varietyError">果樹名と品種名を入力してください</div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeVarietyModal()">閉じる</button>
+        <button class="btn-save blue" onclick="saveMasterVariety()">追加する</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ① 果樹追加 -->
 <div class="overlay" id="addOverlay">
@@ -814,7 +869,13 @@
     </div>
     <div class="field">
       <label>品種（任意）</label>
-      <input type="text" id="inputVariety" placeholder="例：とちおとめ">
+      <select id="inputVarietyId" onchange="handleVarietySelectChange('inputVarietyId','inputVarietyNewWrap')">
+        <option value="">-- 選択しない --</option>
+      </select>
+      <div id="inputVarietyNewWrap" style="display:none; margin-top:6px">
+        <input type="text" id="inputNewFruitName"   placeholder="果樹名（例：いちご）" style="margin-bottom:6px">
+        <input type="text" id="inputNewVarietyName" placeholder="品種名（例：とちおとめ）">
+      </div>
     </div>
     <div class="field">
       <label>植えた日</label>
@@ -919,7 +980,14 @@
       <div class="detail-note-title">編集できる情報</div>
       <div class="field">
         <label>品種</label>
-        <input type="text" id="detailVarietyInput" placeholder="例：とちおとめ">
+        <select id="detailVarietyId" onchange="handleVarietySelectChange('detailVarietyId','detailVarietyNewWrap')">
+          <option value="">-- 選択しない --</option>
+        </select>
+        <div id="detailVarietyNewWrap" style="display:none; margin-top:6px">
+          <input type="text" id="detailNewFruitName"   placeholder="果樹名（例：いちご）" style="margin-bottom:6px">
+          <input type="text" id="detailNewVarietyName" placeholder="品種名（例：とちおとめ）">
+        </div>
+        <div class="variety-legacy-note" id="detailVarietyLegacyNote" style="display:none"></div>
       </div>
       <div class="field">
         <label>鉢のサイズ</label>
@@ -1086,6 +1154,25 @@
 
   /* ════════════ データ ════════════ */
 
+  /* ── 品種マスタ ── */
+  function loadVarieties() {
+    const saved = localStorage.getItem("garden_varieties");
+    return saved ? JSON.parse(saved) : [];
+  }
+
+  function saveVarieties(varieties) {
+    localStorage.setItem("garden_varieties", JSON.stringify(varieties));
+  }
+
+  // 表示用品種名を返す（varietyId優先、なければvariety文字列）
+  function getVarietyDisplayName(plant) {
+    if (plant.varietyId) {
+      const v = loadVarieties().find(v => v.id === plant.varietyId);
+      if (v) return v.name;
+    }
+    return plant.variety || "";
+  }
+
   const DEFAULT_PLANTS = [
     { id: 1, name: "いちご",      variety: "とちおとめ",      icon: "🍓",
       plantedDate: "2025-10-15",
@@ -1115,6 +1202,7 @@
       if (!("fertilizingNote" in p)) p.fertilizingNote = "";
       if (!("potSize"         in p)) p.potSize         = "";
       if (!p.photoHistory)           p.photoHistory    = [];
+      if (!("varietyId" in p))       p.varietyId       = null;
       return p;
     });
   }
@@ -1168,6 +1256,108 @@
     return WORK_TYPES.find(t => t.label === label)?.icon ?? "📝";
   }
 
+  /* ════════════ 品種マスタ ════════════ */
+
+  function openVarietyModal() {
+    renderVarietyList();
+    ["mFruitName","mVarietyName","mMemo"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("varietyError").style.display = "none";
+    document.getElementById("varietyOverlay").classList.add("open");
+  }
+
+  function closeVarietyModal() {
+    document.getElementById("varietyOverlay").classList.remove("open");
+  }
+
+  function renderVarietyList() {
+    const varieties = loadVarieties();
+    const list = document.getElementById("varietyList");
+    if (!varieties.length) {
+      list.innerHTML = '<p style="color:#bbb;font-size:13px;text-align:center;padding:12px 0">品種が登録されていません</p>';
+      return;
+    }
+    list.innerHTML = "";
+    varieties.forEach(v => {
+      const item = document.createElement("div");
+      item.className = "variety-item";
+      item.innerHTML = `
+        <div class="variety-item-info">
+          <span class="variety-item-name">${v.name}</span>
+          ${v.fruitName ? `<span class="variety-item-fruit">${v.fruitName}</span>` : ""}
+        </div>
+        <button class="variety-del-btn" onclick="deleteVariety(${v.id})">✕</button>`;
+      list.appendChild(item);
+    });
+  }
+
+  // 品種マスタモーダルからの追加
+  function saveMasterVariety() {
+    const fruitName = document.getElementById("mFruitName").value.trim();
+    const name      = document.getElementById("mVarietyName").value.trim();
+    if (!fruitName || !name) {
+      document.getElementById("varietyError").style.display = "block";
+      return;
+    }
+    document.getElementById("varietyError").style.display = "none";
+    createVarietyEntry(fruitName, name, document.getElementById("mMemo").value.trim());
+    renderVarietyList();
+    ["mFruitName","mVarietyName","mMemo"].forEach(id => document.getElementById(id).value = "");
+  }
+
+  function deleteVariety(id) {
+    if (!confirm("この品種をマスタから削除しますか？\n紐づいている果樹の品種リンクも解除されます。")) return;
+    saveVarieties(loadVarieties().filter(v => v.id !== id));
+    // 紐づいている果樹の varietyId を解除
+    const plants = loadPlants();
+    plants.forEach(p => { if (p.varietyId === id) p.varietyId = null; });
+    savePlants(plants);
+    renderVarietyList();
+    render();
+  }
+
+  // 品種エントリを新規作成してIDを返す（内部共通処理）
+  function createVarietyEntry(fruitName, name, memo = "") {
+    const varieties = loadVarieties();
+    const newId = varieties.length ? Math.max(...varieties.map(v => v.id)) + 1 : 1;
+    varieties.push({
+      id:              newId,
+      name,
+      fruitName,
+      memo,
+      pruningTime:     "",   // 剪定時期（将来実装）
+      fertilizingTime: "",   // 施肥時期（将来実装）
+      harvestTime:     "",   // 収穫期（将来実装）
+      bloomTime:       "",   // 開花期（将来実装）
+      createdAt:       todayStr()
+    });
+    saveVarieties(varieties);
+    return newId;
+  }
+
+  // セレクトボックスを品種マスタで埋める
+  function populateVarietySelect(selectId, currentVarietyId = null) {
+    const sel = document.getElementById(selectId);
+    const varieties = loadVarieties();
+    sel.innerHTML = '<option value="">-- 選択しない --</option>';
+    varieties.forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v.id;
+      opt.textContent = v.fruitName ? `${v.fruitName} / ${v.name}` : v.name;
+      if (v.id === currentVarietyId) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    const newOpt = document.createElement("option");
+    newOpt.value = "__new__";
+    newOpt.textContent = "＋ 新しい品種を追加";
+    sel.appendChild(newOpt);
+  }
+
+  // "＋ 新しい品種を追加" 選択時にインライン入力欄を表示/非表示
+  function handleVarietySelectChange(selectId, wrapId) {
+    const val = document.getElementById(selectId).value;
+    document.getElementById(wrapId).style.display = val === "__new__" ? "block" : "none";
+  }
+
   /* ════════════ ダッシュボード ════════════ */
 
   function renderDashboard() {
@@ -1209,9 +1399,8 @@
       rankingHtml = `<div class="dash-rank-empty">まだ記録がありません</div>`;
     } else {
       rankingHtml = plantRanking.map((r, i) => {
-        const nameStr = r.plant.variety
-          ? `${r.plant.name}・${r.plant.variety}`
-          : r.plant.name;
+        const varName = getVarietyDisplayName(r.plant);
+        const nameStr = varName ? `${r.plant.name}・${varName}` : r.plant.name;
         const amounts = [];
         if (r.g  > 0) amounts.push(`${fmtNum(r.g)}g`);
         if (r.ko > 0) amounts.push(`${fmtNum(r.ko)}個`);
@@ -1284,7 +1473,7 @@
           <div class="plant-icon">${plant.icon}</div>
           <div class="plant-info">
             <div class="plant-name" onclick="openDetailModal(${plant.id})">${plant.name}</div>
-            <div class="plant-sub">${plant.variety || "品種未登録"}</div>
+            <div class="plant-sub">${getVarietyDisplayName(plant) || "品種未登録"}</div>
           </div>
           <div class="fertilize-block">
             <div class="fertilize-label">最後の施肥</div>
@@ -1376,7 +1565,9 @@
   function openAddModal() {
     selectedIcon = "🌿";
     buildIconPicker();
-    ["inputName","inputVariety","inputPlanted"].forEach(id => document.getElementById(id).value = "");
+    ["inputName","inputPlanted","inputNewFruitName","inputNewVarietyName"].forEach(id => document.getElementById(id).value = "");
+    populateVarietySelect("inputVarietyId");
+    document.getElementById("inputVarietyNewWrap").style.display = "none";
     document.getElementById("addErrorMsg").style.display = "none";
     document.getElementById("addOverlay").classList.add("open");
   }
@@ -1386,12 +1577,24 @@
   function saveNewPlant() {
     const name = document.getElementById("inputName").value.trim();
     if (!name) { document.getElementById("addErrorMsg").style.display = "block"; return; }
+
+    const sel = document.getElementById("inputVarietyId").value;
+    let varietyId = null;
+    if (sel === "__new__") {
+      const fruitName = document.getElementById("inputNewFruitName").value.trim();
+      const varName   = document.getElementById("inputNewVarietyName").value.trim();
+      if (varName) varietyId = createVarietyEntry(fruitName, varName);
+    } else if (sel) {
+      varietyId = parseInt(sel);
+    }
+
     const plants = loadPlants();
     const newId  = plants.length ? Math.max(...plants.map(p => p.id)) + 1 : 1;
     plants.push({
       id:               newId,
       name,
-      variety:          document.getElementById("inputVariety").value.trim(),
+      variety:          "",   // 新規登録は varietyId で管理
+      varietyId,
       icon:             selectedIcon,
       plantedDate:      document.getElementById("inputPlanted").value,
       fertilizeHistory: [],
@@ -1581,11 +1784,24 @@
 
     document.getElementById("detailIcon").textContent    = plant.icon;
     document.getElementById("detailName").textContent    = plant.name;
-    document.getElementById("detailVariety").textContent = plant.variety || "品種未登録";
-    document.getElementById("detailVarietyInput").value  = plant.variety         || "";
+    document.getElementById("detailVariety").textContent = getVarietyDisplayName(plant) || "品種未登録";
     document.getElementById("detailPotSize").value       = plant.potSize         || "";
     document.getElementById("detailPruning").value       = plant.pruningNote     || "";
     document.getElementById("detailFertilizing").value   = plant.fertilizingNote || "";
+
+    // 品種ドロップダウンを設定
+    populateVarietySelect("detailVarietyId", plant.varietyId);
+    document.getElementById("detailVarietyNewWrap").style.display = "none";
+    ["detailNewFruitName","detailNewVarietyName"].forEach(id => document.getElementById(id).value = "");
+
+    // 旧データ（variety文字列）を持つ場合は注記を表示
+    const legacyNote = document.getElementById("detailVarietyLegacyNote");
+    if (plant.variety && !plant.varietyId) {
+      legacyNote.style.display = "block";
+      legacyNote.textContent   = `現在の設定（旧形式）: 「${plant.variety}」`;
+    } else {
+      legacyNote.style.display = "none";
+    }
 
     // 植え替え履歴（workHistoryのtype==="植え替え"）
     const repotDates = (plant.workHistory || [])
@@ -1631,7 +1847,22 @@
     const plants = loadPlants();
     const plant  = plants.find(p => p.id === activeDetailId);
     if (!plant) return;
-    plant.variety         = document.getElementById("detailVarietyInput").value.trim();
+    // 品種マスタとの紐づけを更新
+    const detailSel = document.getElementById("detailVarietyId").value;
+    if (detailSel === "__new__") {
+      const fruitName = document.getElementById("detailNewFruitName").value.trim();
+      const varName   = document.getElementById("detailNewVarietyName").value.trim();
+      if (varName) {
+        plant.varietyId = createVarietyEntry(fruitName, varName);
+        plant.variety   = "";
+      }
+    } else if (detailSel) {
+      plant.varietyId = parseInt(detailSel);
+      plant.variety   = "";
+    } else {
+      plant.varietyId = null;
+      // variety文字列（旧データ）はそのまま保持
+    }
     plant.potSize         = document.getElementById("detailPotSize").value.trim();
     plant.pruningNote     = document.getElementById("detailPruning").value.trim();
     plant.fertilizingNote = document.getElementById("detailFertilizing").value.trim();
@@ -2113,7 +2344,7 @@
 
   /* ════════════ オーバーレイ外クリックで閉じる ════════════ */
 
-  ["addOverlay","recordOverlay","workOverlay","detailOverlay","historyOverlay","galleryOverlay","photoRegOverlay"].forEach(id => {
+  ["varietyOverlay","addOverlay","recordOverlay","workOverlay","detailOverlay","historyOverlay","galleryOverlay","photoRegOverlay"].forEach(id => {
     document.getElementById(id).addEventListener("click", function(e) {
       if (e.target === this) {
         this.classList.remove("open");
