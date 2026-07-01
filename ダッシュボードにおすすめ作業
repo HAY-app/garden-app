@@ -88,6 +88,8 @@
     .dash-task-section-title { font-size: 11px; color: #aaa; font-weight: bold; letter-spacing: 0.3px; margin-bottom: 6px; }
     .dash-task-row { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 4px 0; }
     .dash-task-row.done { opacity: 0.4; text-decoration: line-through; }
+    .dash-task-row.clickable { cursor: pointer; border-radius: 6px; transition: background 0.15s; }
+    .dash-task-row.clickable:hover { background: #f0f7ee; }
     .dash-task-check { font-size: 12px; width: 16px; text-align: center; flex-shrink: 0; color: #4a7c59; }
     .dash-task-plant { color: #888; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dash-task-divider { border: none; border-top: 1px solid #f0f0f0; margin: 8px 0; }
@@ -1655,11 +1657,15 @@
     const thisTasks    = getRecommendedTasks(plants, varieties, thisMonth, thisYear);
     const nextTasks    = getRecommendedTasks(plants, varieties, nextMonth, nextYear);
     const buildTaskRow = t => {
-      const nm  = t.variety.name;
-      const ps  = `${t.plant.icon} ${t.plant.name}${nm ? '・' + nm : ''}`;
-      const cls = t.done ? ' done' : '';
-      const chk = t.done ? '✅' : '○';
-      return `<div class="dash-task-row${cls}"><span class="dash-task-check">${chk}</span><span>${t.icon} ${t.label}</span><span class="dash-task-plant">${ps}</span></div>`;
+      const nm     = t.variety.name;
+      const ps     = `${t.plant.icon} ${t.plant.name}${nm ? '・' + nm : ''}`;
+      const cls    = t.done ? ' done' : ' clickable';
+      const chk    = t.done ? '✅' : '○';
+      const action = t.done ? '' :
+        t.label === '施肥'
+          ? `onclick="openRecordModal(${t.plant.id})"`
+          : `onclick="openWorkModal(${t.plant.id}, '${t.label}')"`;
+      return `<div class="dash-task-row${cls}" ${action}><span class="dash-task-check">${chk}</span><span>${t.icon} ${t.label}</span><span class="dash-task-plant">${ps}</span></div>`;
     };
     const thisTasksHtml = thisTasks.length
       ? thisTasks.map(buildTaskRow).join('')
@@ -1998,9 +2004,9 @@
     });
   }
 
-  function openWorkModal(id) {
+  function openWorkModal(id, workType = WORK_TYPES[0].label) {
     activeWorkId     = id;
-    selectedWorkType = WORK_TYPES[0].label;
+    selectedWorkType = workType;
     selectedUnit     = "g";
     const plant = loadPlants().find(p => p.id === id);
     document.getElementById("workTitle").textContent    = `📓 作業を記録 — ${plant.name}`;
