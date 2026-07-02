@@ -83,6 +83,17 @@
     .dash-rank-name { flex: 1; color: #444; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dash-rank-val { font-weight: bold; color: #2d5016; white-space: nowrap; }
     .dash-rank-empty { color: #ccc; font-size: 13px; }
+    .dash-tasks { display: flex; flex-direction: column; }
+    .dash-task-section { margin-bottom: 4px; }
+    .dash-task-section-title { font-size: 11px; color: #aaa; font-weight: bold; letter-spacing: 0.3px; margin-bottom: 6px; }
+    .dash-task-row { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 4px 0; }
+    .dash-task-row.done { opacity: 0.4; text-decoration: line-through; }
+    .dash-task-row.clickable { cursor: pointer; border-radius: 6px; transition: background 0.15s; }
+    .dash-task-row.clickable:hover { background: #f0f7ee; }
+    .dash-task-check { font-size: 12px; width: 16px; text-align: center; flex-shrink: 0; color: #4a7c59; }
+    .dash-task-plant { color: #888; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dash-task-divider { border: none; border-top: 1px solid #f0f0f0; margin: 8px 0; }
+    .dash-tasks-empty { color: #ccc; font-size: 13px; }
 
     /* ── 品種マスタ ── */
     .variety-item {
@@ -106,6 +117,19 @@
     }
     .variety-add-title { font-size: 13px; font-weight: bold; color: #555; margin-bottom: 10px; }
     .variety-legacy-note { font-size: 11px; color: #aaa; margin-top: 4px; }
+    .variety-item-info { cursor: pointer; }
+    .variety-item-info:hover .variety-item-name { text-decoration: underline; color: #3a7040; }
+    .variety-season-badge { font-size: 10px; color: #4a7c59; background: #eaf3e4; border-radius: 4px; padding: 1px 5px; margin-left: 6px; }
+    /* 月ピッカー */
+    .month-picker { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+    .month-btn {
+      width: 38px; padding: 5px 0; text-align: center;
+      border: 1px solid #ddd; border-radius: 6px;
+      font-size: 11px; cursor: pointer; background: white; color: #666;
+      user-select: none;
+    }
+    .month-btn.selected { background: #4a7c59; color: white; border-color: #4a7c59; font-weight: bold; }
+    .month-btn:hover:not(.selected) { background: #f0f7f0; }
     .plant-list { display: flex; flex-direction: column; gap: 12px; }
 
     /* ── カード ── */
@@ -133,6 +157,17 @@
     }
     .plant-name:hover { text-decoration: underline; color: #3a7040; }
     .plant-sub  { font-size: 12px; color: #888; margin-top: 2px; }
+    .card-season-row {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      padding: 6px 18px; border-top: 1px solid #f5f5f5;
+      font-size: 11px; color: #aaa;
+    }
+    .season-item { display: flex; align-items: center; gap: 3px; }
+    .season-item.in-season { color: #4a7c59; font-weight: bold; }
+    .season-now-badge {
+      font-size: 9px; background: #4a7c59; color: white;
+      border-radius: 3px; padding: 1px 4px; margin-left: 2px;
+    }
 
     .fertilize-block { text-align: right; flex-shrink: 0; }
     .fertilize-label { font-size: 11px; color: #aaa; }
@@ -832,8 +867,8 @@
       <button class="modal-close-btn" onclick="closeVarietyModal()">✕</button>
     </div>
     <div id="varietyList"></div>
-    <div class="variety-add-section">
-      <div class="variety-add-title">＋ 品種を追加</div>
+    <div class="variety-add-section" id="varietyFormSection">
+      <div class="variety-add-title" id="varietyFormTitle">＋ 品種を追加</div>
       <div class="field">
         <label>果樹名 <span style="color:#e74c3c">*</span></label>
         <input type="text" id="mFruitName" placeholder="例：いちご">
@@ -846,10 +881,30 @@
         <label>メモ（任意）</label>
         <input type="text" id="mMemo" placeholder="特性・育て方など">
       </div>
+      <div class="field">
+        <label>剪定時期（任意）</label>
+        <div class="month-picker" id="mPruningPicker"></div>
+      </div>
+      <div class="field">
+        <label>施肥時期（任意）</label>
+        <div class="month-picker" id="mFertilizingPicker"></div>
+      </div>
+      <div class="field">
+        <label>開花期（任意）</label>
+        <div class="month-picker" id="mBloomPicker"></div>
+      </div>
+      <div class="field">
+        <label>収穫期（任意）</label>
+        <div class="month-picker" id="mHarvestPicker"></div>
+      </div>
+      <div class="field">
+        <label>植え替え時期（任意）</label>
+        <div class="month-picker" id="mRepotPicker"></div>
+      </div>
       <div class="error-msg" id="varietyError">果樹名と品種名を入力してください</div>
       <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeVarietyModal()">閉じる</button>
-        <button class="btn-save blue" onclick="saveMasterVariety()">追加する</button>
+        <button class="btn-cancel" id="varietyFormCancelBtn" onclick="cancelVarietyForm()">キャンセル</button>
+        <button class="btn-save blue" id="varietyFormSaveBtn" onclick="saveVarietyForm()">追加する</button>
       </div>
     </div>
   </div>
@@ -892,7 +947,7 @@
 <!-- ② 施肥記録 -->
 <div class="overlay" id="recordOverlay">
   <div class="modal">
-    <h2 id="recordTitle">💧 施肥を記録</h2>
+    <h2 id="recordTitle">🧪 施肥を記録</h2>
     <div class="field">
       <label>施肥日 <span style="color:#e74c3c">*</span></label>
       <input type="date" id="recordDate">
@@ -992,14 +1047,6 @@
       <div class="field">
         <label>鉢のサイズ</label>
         <input type="text" id="detailPotSize" placeholder="例：8号鉢、10リットル、地植えなど">
-      </div>
-      <div class="field">
-        <label>剪定時期（目安）</label>
-        <input type="text" id="detailPruning" placeholder="例：2月〜3月">
-      </div>
-      <div class="field">
-        <label>追肥時期（目安）</label>
-        <input type="text" id="detailFertilizing" placeholder="例：3月・6月・9月">
       </div>
     </div>
 
@@ -1131,6 +1178,13 @@
     { label: "その他",   icon: "📝" }
   ];
 
+  // おすすめ作業・通知・カレンダー表示で共用する作業種別定義
+  const RECOMMENDED_TASK_TYPES = [
+    { field: "pruningTime",     label: "剪定",    icon: "✂️",  history: "work"      },
+    { field: "fertilizingTime", label: "施肥",    icon: "🧪",  history: "fertilize" },
+    { field: "repotTime",       label: "植え替え", icon: "🪴",  history: "work"      },
+  ];
+
   /* ════════════ 状態 ════════════ */
 
   let selectedIcon     = "🌿";
@@ -1149,15 +1203,23 @@
   let chartMode           = "month"; // "month" または "year"
   let detailChartUnit     = "g";     // "g" または "個"
   const historyPhotoCache = [];
-  let dragSourceId     = null;
-  let activeDetailId   = null;
+  let dragSourceId        = null;
+  let activeDetailId      = null;
+  let activeVarietyEditId = null; // null=追加モード / 数字=編集モード
 
   /* ════════════ データ ════════════ */
 
   /* ── 品種マスタ ── */
   function loadVarieties() {
     const saved = localStorage.getItem("garden_varieties");
-    return saved ? JSON.parse(saved) : [];
+    if (!saved) return [];
+    return JSON.parse(saved).map(v => {
+      // 旧データ移行: 文字列 "" → 空配列 []
+      ["pruningTime","fertilizingTime","harvestTime","bloomTime","repotTime"].forEach(field => {
+        if (!Array.isArray(v[field])) v[field] = [];
+      });
+      return v;
+    });
   }
 
   function saveVarieties(varieties) {
@@ -1198,8 +1260,6 @@
         delete p.lastFertilized;
       }
       if (!p.workHistory)      p.workHistory = [];
-      if (!("pruningNote"     in p)) p.pruningNote     = "";
-      if (!("fertilizingNote" in p)) p.fertilizingNote = "";
       if (!("potSize"         in p)) p.potSize         = "";
       if (!p.photoHistory)           p.photoHistory    = [];
       if (!("varietyId" in p))       p.varietyId       = null;
@@ -1224,6 +1284,72 @@
   }
 
   /* ════════════ ユーティリティ ════════════ */
+
+  /* ── 月判定（おすすめ作業・通知・カレンダーで再利用） ── */
+
+  // 今月の番号を返す（1〜12）
+  function getThisMonth() {
+    return new Date().getMonth() + 1;
+  }
+
+  // 来月の番号を返す（12の次は1に戻る）
+  function getNextMonth() {
+    const m = getThisMonth();
+    return m === 12 ? 1 : m + 1;
+  }
+
+  // 指定した月が配列に含まれるか判定
+  // 使い方: isInSeason([2, 3], 2) → true
+  function isInSeason(monthArray, month) {
+    return Array.isArray(monthArray) && monthArray.includes(month);
+  }
+
+  // 品種リストから「指定月が作業時期」の品種だけ返す
+  // 使い方: getVarietiesInSeason(varieties, "harvestTime") → 今月収穫できる品種
+  function getVarietiesInSeason(varieties, field, month = getThisMonth()) {
+    return varieties.filter(v => isInSeason(v[field], month));
+  }
+
+  // 月番号の配列を日本語文字列に変換（表示用）
+  // 使い方: formatMonths([2, 3]) → "2月・3月"
+  function formatMonths(monthArray) {
+    if (!Array.isArray(monthArray) || !monthArray.length) return "未設定";
+    return [...monthArray].sort((a, b) => a - b).map(m => `${m}月`).join("・");
+  }
+
+  // 指定した月・年にその作業が完了済みか判定
+  // 施肥は fertilizeHistory、それ以外は workHistory の type で判定
+  function isTaskDoneThisMonth(plant, taskType, month, year) {
+    if (taskType.history === "fertilize") {
+      return (plant.fertilizeHistory || []).some(e => {
+        const d = new Date(e.date);
+        return d.getFullYear() === year && d.getMonth() + 1 === month;
+      });
+    }
+    return (plant.workHistory || []).some(e => {
+      const d = new Date(e.date);
+      return d.getFullYear() === year && d.getMonth() + 1 === month && e.type === taskType.label;
+    });
+  }
+
+  // 推奨作業を判定して返す（通知・カレンダー・年間予定でも再利用可能）
+  // 戻り値: [{ plant, variety, label, icon, done }, ...]
+  function getRecommendedTasks(plants, varieties, month, year) {
+    const tasks = [];
+    plants.forEach(plant => {
+      if (!plant.varietyId) return;
+      const variety = varieties.find(v => v.id === plant.varietyId);
+      if (!variety) return;
+      RECOMMENDED_TASK_TYPES.forEach(taskType => {
+        if (!isInSeason(variety[taskType.field], month)) return;
+        const done = isTaskDoneThisMonth(plant, taskType, month, year);
+        tasks.push({ plant, variety, label: taskType.label, icon: taskType.icon, done });
+      });
+    });
+    return tasks;
+  }
+
+  /* ── 日付ユーティリティ ── */
 
   function daysSince(dateStr) {
     if (!dateStr) return null;
@@ -1256,17 +1382,36 @@
     return WORK_TYPES.find(t => t.label === label)?.icon ?? "📝";
   }
 
+  // カード用の時期行HTMLを生成（品種マスタの剪定時期・追肥時期を表示）
+  function buildSeasonRow(variety, thisMonth) {
+    if (!variety) return "";
+    const parts = [];
+
+    if (variety.pruningTime?.length) {
+      const active = isInSeason(variety.pruningTime, thisMonth);
+      const badge  = active ? '<span class="season-now-badge">今月</span>' : "";
+      parts.push(`<span class="season-item${active ? " in-season" : ""}">✂️ ${formatMonths(variety.pruningTime)}${badge}</span>`);
+    }
+    if (variety.fertilizingTime?.length) {
+      const active = isInSeason(variety.fertilizingTime, thisMonth);
+      const badge  = active ? '<span class="season-now-badge">今月</span>' : "";
+      parts.push(`<span class="season-item${active ? " in-season" : ""}">🧪 ${formatMonths(variety.fertilizingTime)}${badge}</span>`);
+    }
+
+    return parts.length ? `<div class="card-season-row">${parts.join("")}</div>` : "";
+  }
+
   /* ════════════ 品種マスタ ════════════ */
 
   function openVarietyModal() {
     renderVarietyList();
-    ["mFruitName","mVarietyName","mMemo"].forEach(id => document.getElementById(id).value = "");
-    document.getElementById("varietyError").style.display = "none";
+    resetVarietyForm();
     document.getElementById("varietyOverlay").classList.add("open");
   }
 
   function closeVarietyModal() {
     document.getElementById("varietyOverlay").classList.remove("open");
+    activeVarietyEditId = null;
   }
 
   function renderVarietyList() {
@@ -1278,20 +1423,65 @@
     }
     list.innerHTML = "";
     varieties.forEach(v => {
+      const hasSeasons = [v.pruningTime, v.fertilizingTime, v.bloomTime, v.harvestTime, v.repotTime]
+        .some(a => Array.isArray(a) && a.length > 0);
       const item = document.createElement("div");
       item.className = "variety-item";
       item.innerHTML = `
-        <div class="variety-item-info">
+        <div class="variety-item-info" onclick="openVarietyEdit(${v.id})">
           <span class="variety-item-name">${v.name}</span>
           ${v.fruitName ? `<span class="variety-item-fruit">${v.fruitName}</span>` : ""}
+          ${hasSeasons  ? `<span class="variety-season-badge">時期あり</span>` : ""}
         </div>
         <button class="variety-del-btn" onclick="deleteVariety(${v.id})">✕</button>`;
       list.appendChild(item);
     });
   }
 
-  // 品種マスタモーダルからの追加
-  function saveMasterVariety() {
+  // 品種名クリックで編集フォームを開く
+  function openVarietyEdit(id) {
+    const v = loadVarieties().find(v => v.id === id);
+    if (!v) return;
+    activeVarietyEditId = id;
+
+    document.getElementById("mFruitName").value   = v.fruitName || "";
+    document.getElementById("mVarietyName").value = v.name;
+    document.getElementById("mMemo").value        = v.memo || "";
+
+    buildMonthPicker("mPruningPicker",     v.pruningTime     || []);
+    buildMonthPicker("mFertilizingPicker", v.fertilizingTime || []);
+    buildMonthPicker("mBloomPicker",       v.bloomTime       || []);
+    buildMonthPicker("mHarvestPicker",     v.harvestTime     || []);
+    buildMonthPicker("mRepotPicker",       v.repotTime       || []);
+
+    document.getElementById("varietyFormTitle").textContent   = "✏️ 品種を編集";
+    document.getElementById("varietyFormSaveBtn").textContent = "保存する";
+    document.getElementById("varietyError").style.display     = "none";
+    document.getElementById("varietyFormSection").scrollIntoView({ behavior: "smooth" });
+  }
+
+  // フォームを追加モードにリセット
+  function resetVarietyForm() {
+    activeVarietyEditId = null;
+    ["mFruitName","mVarietyName","mMemo"].forEach(id => document.getElementById(id).value = "");
+    buildMonthPicker("mPruningPicker");
+    buildMonthPicker("mFertilizingPicker");
+    buildMonthPicker("mBloomPicker");
+    buildMonthPicker("mHarvestPicker");
+    buildMonthPicker("mRepotPicker");
+    document.getElementById("varietyFormTitle").textContent   = "＋ 品種を追加";
+    document.getElementById("varietyFormSaveBtn").textContent = "追加する";
+    document.getElementById("varietyError").style.display     = "none";
+  }
+
+  // キャンセル：編集中はリセット、追加中は閉じる
+  function cancelVarietyForm() {
+    if (activeVarietyEditId) resetVarietyForm();
+    else                     closeVarietyModal();
+  }
+
+  // 追加・編集の共通保存処理
+  function saveVarietyForm() {
     const fruitName = document.getElementById("mFruitName").value.trim();
     const name      = document.getElementById("mVarietyName").value.trim();
     if (!fruitName || !name) {
@@ -1299,20 +1489,63 @@
       return;
     }
     document.getElementById("varietyError").style.display = "none";
-    createVarietyEntry(fruitName, name, document.getElementById("mMemo").value.trim());
+
+    const entry = {
+      fruitName,
+      name,
+      memo:            document.getElementById("mMemo").value.trim(),
+      pruningTime:     getSelectedMonths("mPruningPicker"),
+      fertilizingTime: getSelectedMonths("mFertilizingPicker"),
+      bloomTime:       getSelectedMonths("mBloomPicker"),
+      harvestTime:     getSelectedMonths("mHarvestPicker"),
+      repotTime:       getSelectedMonths("mRepotPicker"),
+    };
+
+    const varieties = loadVarieties();
+    if (activeVarietyEditId) {
+      const idx = varieties.findIndex(v => v.id === activeVarietyEditId);
+      if (idx !== -1) varieties[idx] = { ...varieties[idx], ...entry };
+    } else {
+      const newId = varieties.length ? Math.max(...varieties.map(v => v.id)) + 1 : 1;
+      varieties.push({ id: newId, ...entry, createdAt: todayStr() });
+    }
+
+    saveVarieties(varieties);
     renderVarietyList();
-    ["mFruitName","mVarietyName","mMemo"].forEach(id => document.getElementById(id).value = "");
+    resetVarietyForm();
+    render();
   }
 
   function deleteVariety(id) {
     if (!confirm("この品種をマスタから削除しますか？\n紐づいている果樹の品種リンクも解除されます。")) return;
     saveVarieties(loadVarieties().filter(v => v.id !== id));
-    // 紐づいている果樹の varietyId を解除
     const plants = loadPlants();
     plants.forEach(p => { if (p.varietyId === id) p.varietyId = null; });
     savePlants(plants);
     renderVarietyList();
     render();
+  }
+
+  // 12か月のボタンを生成する
+  function buildMonthPicker(containerId, selectedMonths = []) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    for (let m = 1; m <= 12; m++) {
+      const btn = document.createElement("button");
+      btn.type          = "button";
+      btn.dataset.month = m;
+      btn.className     = "month-btn" + (selectedMonths.includes(m) ? " selected" : "");
+      btn.textContent   = `${m}月`;
+      btn.onclick       = () => btn.classList.toggle("selected");
+      container.appendChild(btn);
+    }
+  }
+
+  // 月ピッカーから選択中の月番号を配列で返す
+  function getSelectedMonths(containerId) {
+    return Array.from(document.getElementById(containerId).querySelectorAll(".month-btn.selected"))
+      .map(btn => parseInt(btn.dataset.month))
+      .sort((a, b) => a - b);
   }
 
   // 品種エントリを新規作成してIDを返す（内部共通処理）
@@ -1324,10 +1557,11 @@
       name,
       fruitName,
       memo,
-      pruningTime:     "",   // 剪定時期（将来実装）
-      fertilizingTime: "",   // 施肥時期（将来実装）
-      harvestTime:     "",   // 収穫期（将来実装）
-      bloomTime:       "",   // 開花期（将来実装）
+      pruningTime:     [],   // 剪定時期:    月番号の配列 例) [2, 3]
+      fertilizingTime: [],   // 施肥時期:    月番号の配列 例) [3, 6, 9]
+      harvestTime:     [],   // 収穫期:      月番号の配列 例) [6, 7, 8]
+      bloomTime:       [],   // 開花期:      月番号の配列 例) [4, 5]
+      repotTime:       [],   // 植え替え時期: 月番号の配列 例) [3, 10]
       createdAt:       todayStr()
     });
     saveVarieties(varieties);
@@ -1415,6 +1649,31 @@
       }).join('');
     }
 
+    // おすすめ作業の計算
+    const varieties    = loadVarieties();
+    const thisMonth    = getThisMonth();
+    const nextMonth    = getNextMonth();
+    const nextYear     = nextMonth === 1 ? thisYear + 1 : thisYear;
+    const thisTasks    = getRecommendedTasks(plants, varieties, thisMonth, thisYear);
+    const nextTasks    = getRecommendedTasks(plants, varieties, nextMonth, nextYear);
+    const buildTaskRow = t => {
+      const nm     = t.variety.name;
+      const ps     = `${t.plant.icon} ${t.plant.name}${nm ? '・' + nm : ''}`;
+      const cls    = t.done ? ' done' : ' clickable';
+      const chk    = t.done ? '✅' : '○';
+      const action = t.done ? '' :
+        t.label === '施肥'
+          ? `onclick="openRecordModal(${t.plant.id})"`
+          : `onclick="openWorkModal(${t.plant.id}, '${t.label}')"`;
+      return `<div class="dash-task-row${cls}" ${action}><span class="dash-task-check">${chk}</span><span>${t.icon} ${t.label}</span><span class="dash-task-plant">${ps}</span></div>`;
+    };
+    const thisTasksHtml = thisTasks.length
+      ? thisTasks.map(buildTaskRow).join('')
+      : '<div class="dash-tasks-empty">今月のおすすめ作業はありません</div>';
+    const nextTasksHtml = nextTasks.length
+      ? nextTasks.map(buildTaskRow).join('')
+      : '<div class="dash-tasks-empty">来月のおすすめ作業はありません</div>';
+
     document.getElementById("dashboard").innerHTML = `
       <div class="dash-card">
         <div class="dash-icon">🌿</div>
@@ -1440,6 +1699,20 @@
         <div class="dash-card-title">📊 今年の収穫量ランキング</div>
         <div class="dash-ranking">${rankingHtml}</div>
       </div>
+      <div class="dash-card wide">
+        <div class="dash-card-title">📌 おすすめ作業</div>
+        <div class="dash-tasks">
+          <div class="dash-task-section">
+            <div class="dash-task-section-title">今月（${thisMonth}月）</div>
+            ${thisTasksHtml}
+          </div>
+          <hr class="dash-task-divider">
+          <div class="dash-task-section">
+            <div class="dash-task-section-title">来月（${nextMonth}月）</div>
+            ${nextTasksHtml}
+          </div>
+        </div>
+      </div>
     `;
   }
 
@@ -1456,12 +1729,19 @@
       return;
     }
 
+    const varieties  = loadVarieties();
+    const thisMonth  = getThisMonth();
+
     plants.forEach(plant => {
       const lastDate   = getLastFertilized(plant);
       const days       = daysSince(lastDate);
       const cls        = badgeClass(days);
       const daysText   = days !== null ? `${days}日経過` : "未記録";
       const totalCount = (plant.fertilizeHistory?.length ?? 0) + (plant.workHistory?.length ?? 0);
+
+      // 品種マスタから剪定時期・追肥時期を取得
+      const variety    = plant.varietyId ? varieties.find(v => v.id === plant.varietyId) : null;
+      const seasonHtml = buildSeasonRow(variety, thisMonth);
 
       const card = document.createElement("div");
       card.className = "plant-card";
@@ -1481,9 +1761,10 @@
             <span class="days-badge ${cls}">${daysText}</span>
           </div>
         </div>
+        ${seasonHtml}
         <div class="card-footer">
           <div class="footer-actions">
-            <button class="btn-fertilize" onclick="openRecordModal(${plant.id})">💧 施肥を記録</button>
+            <button class="btn-fertilize" onclick="openRecordModal(${plant.id})">🧪 施肥を記録</button>
             <button class="btn-work"      onclick="openWorkModal(${plant.id})">📓 作業を記録</button>
           </div>
           <button class="btn-history" onclick="openHistoryModal(${plant.id})">
@@ -1610,7 +1891,7 @@
   function openRecordModal(id) {
     activeRecordId = id;
     const plant = loadPlants().find(p => p.id === id);
-    document.getElementById("recordTitle").textContent = `💧 施肥を記録 — ${plant.name}`;
+    document.getElementById("recordTitle").textContent = `🧪 施肥を記録 — ${plant.name}`;
     document.getElementById("recordDate").value = todayStr();
     document.getElementById("recordMemo").value = "";
     document.getElementById("recordOverlay").classList.add("open");
@@ -1723,9 +2004,9 @@
     });
   }
 
-  function openWorkModal(id) {
+  function openWorkModal(id, workType = WORK_TYPES[0].label) {
     activeWorkId     = id;
-    selectedWorkType = WORK_TYPES[0].label;
+    selectedWorkType = workType;
     selectedUnit     = "g";
     const plant = loadPlants().find(p => p.id === id);
     document.getElementById("workTitle").textContent    = `📓 作業を記録 — ${plant.name}`;
@@ -1785,9 +2066,7 @@
     document.getElementById("detailIcon").textContent    = plant.icon;
     document.getElementById("detailName").textContent    = plant.name;
     document.getElementById("detailVariety").textContent = getVarietyDisplayName(plant) || "品種未登録";
-    document.getElementById("detailPotSize").value       = plant.potSize         || "";
-    document.getElementById("detailPruning").value       = plant.pruningNote     || "";
-    document.getElementById("detailFertilizing").value   = plant.fertilizingNote || "";
+    document.getElementById("detailPotSize").value       = plant.potSize || "";
 
     // 品種ドロップダウンを設定
     populateVarietySelect("detailVarietyId", plant.varietyId);
@@ -1863,9 +2142,7 @@
       plant.varietyId = null;
       // variety文字列（旧データ）はそのまま保持
     }
-    plant.potSize         = document.getElementById("detailPotSize").value.trim();
-    plant.pruningNote     = document.getElementById("detailPruning").value.trim();
-    plant.fertilizingNote = document.getElementById("detailFertilizing").value.trim();
+    plant.potSize = document.getElementById("detailPotSize").value.trim();
     savePlants(plants);
     closeDetailModal();
     render();
@@ -1886,7 +2163,7 @@
   }
 
   function filterLabel(key) {
-    if (key === "fertilize") return "💧 施肥";
+    if (key === "fertilize") return "🧪 施肥";
     return `${workTypeIcon(key)} ${key}`;
   }
 
@@ -1940,7 +2217,7 @@
     historyPhotoCache.length = 0;
     filtered.forEach(entry => {
       const isFertilize = entry.kind === "fertilize";
-      const badgeText   = isFertilize ? "💧 施肥" : `${workTypeIcon(entry.type)} ${entry.type}`;
+      const badgeText   = isFertilize ? "🧪 施肥" : `${workTypeIcon(entry.type)} ${entry.type}`;
       const badgeCls    = isFertilize ? "fertilize" : "work";
 
       let photoHtml = "";
